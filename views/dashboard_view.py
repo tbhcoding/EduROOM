@@ -22,6 +22,10 @@ def show_dashboard(page, user_id, role, name):
         from views.admin_view import show_admin_panel
         show_admin_panel(page, user_id, role, name)
     
+    def view_analytics(e):
+        from views.analytics_view import show_analytics_dashboard
+        show_analytics_dashboard(page, user_id, role, name)
+    
     # Get classrooms from database
     classrooms = ClassroomModel.get_all_classrooms()
     
@@ -117,6 +121,11 @@ def show_dashboard(page, user_id, role, name):
                             "Admin Panel",
                             icon=ICONS.ADMIN_PANEL_SETTINGS,
                             on_click=view_admin_panel
+                        ) if role == "admin" else ft.Container(),
+                        ft.ElevatedButton(
+                            "Analytics Dashboard",
+                            icon=ICONS.ANALYTICS,
+                            on_click=view_analytics
                         ) if role == "admin" else ft.Container(),
                     ], spacing=10)
                 ]),
