@@ -5,14 +5,24 @@ from views.dashboard_view import show_dashboard
 
 def show_login(page):
     """Display the login page with database authentication"""
-    
+    def on_focus(tf):
+        tf.border_color = "#0097b2"
+        tf.update()
+
+    def on_blur(tf):
+        tf.border_color = "#cccccc"
+        tf.update()
+
     email_field = ft.TextField(
         label="CSPC Email",
         hint_text="yourname@my.cspc.edu.ph",
         width=460,
         height=60,
         border_radius=10,
-        text_size=14
+        text_size=14,
+        border_color="#cccccc",
+        on_focus=lambda e: on_focus(email_field),
+        on_blur=lambda e: on_blur(email_field)
     )
     
     id_number_field = ft.TextField(
@@ -21,7 +31,10 @@ def show_login(page):
         width=460,
         height=60,
         border_radius=10,
-        text_size=14
+        text_size=14,
+        border_color="#cccccc",
+        on_focus=lambda e: on_focus(id_number_field),
+        on_blur=lambda e: on_blur(id_number_field)
     )
     
     password_field = ft.TextField(
@@ -32,7 +45,10 @@ def show_login(page):
         width=460,
         height=60,
         border_radius=10,
-        text_size=14
+        text_size=14,
+        border_color="#cccccc",
+        on_focus=lambda e: on_focus(password_field),
+        on_blur=lambda e: on_blur(password_field)
     )
     
     error_text = ft.Text("", color="red", size=12)
@@ -87,6 +103,13 @@ def show_login(page):
         )
     )
     
+    LOGIN_BUTTON_STYLE = ft.ButtonStyle(
+        shape=ft.RoundedRectangleBorder(radius=30),
+        bgcolor="#5A5A5A", 
+        color="white",
+        overlay_color="#0097b2",
+    )
+
     page.controls.clear()
     page.add(
         ft.Container(
@@ -105,22 +128,17 @@ def show_login(page):
                 error_text,
                 ft.Container(height=10),
                 ft.ElevatedButton(
-                    "Login",
-                    width=460,
-                    height=50,
-                    style=ft.ButtonStyle(
-                        shape=ft.RoundedRectangleBorder(radius=10),
-                        bgcolor="#5A5A5A",
-                        color="white"
-                    ),
-                    on_click=login_click
+                        "Login",
+                        width=360,
+                        height=50,
+                        style=LOGIN_BUTTON_STYLE,
+                        on_click=login_click,
                 ),
             ], 
             horizontal_alignment=ft.CrossAxisAlignment.CENTER,
             spacing=5),
             padding=40,
-            expand=True,
-            alignment=ft.alignment.center
+            alignment=ft.alignment.center,
         )
     )
     page.update()
