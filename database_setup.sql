@@ -25,10 +25,6 @@
 --   ID Number: 20231002
 --   Password: faculty2025
 --
---   Email: profgarcia@my.cspc.edu.ph
---   ID Number: 20231003
---   Password: faculty2025
---
 -- STUDENT ACCOUNTS:
 --   Email: johndoe@my.cspc.edu.ph
 --   ID Number: 25123456
@@ -38,13 +34,7 @@
 --   ID Number: 25123457
 --   Password: student2025
 --
---   Email: michaelbrown@my.cspc.edu.ph
---   ID Number: 25123458
---   Password: student2025
---
---   Email: emilywhite@my.cspc.edu.ph
---   ID Number: 25123459
---   Password: student2025
+
 -- =====================================================
 
 -- Create Database
@@ -141,13 +131,10 @@ INSERT INTO users (email, id_number, password_hash, role, full_name) VALUES
 -- Faculty Accounts
 ('profsmith@my.cspc.edu.ph', '20231001', '$2b$12$tJzBR7wwDZ6mgx.dW8dk7OVo.RA13eIMK2HZX3BDvLqZtXIEGClyu', 'faculty', 'Prof. John Smith'),
 ('profjohnson@my.cspc.edu.ph', '20231002', '$2b$12$tJzBR7wwDZ6mgx.dW8dk7OVo.RA13eIMK2HZX3BDvLqZtXIEGClyu', 'faculty', 'Prof. Sarah Johnson'),
-('profgarcia@my.cspc.edu.ph', '20231003', '$2b$12$tJzBR7wwDZ6mgx.dW8dk7OVo.RA13eIMK2HZX3BDvLqZtXIEGClyu', 'faculty', 'Prof. Maria Garcia'),
 
 -- Student Accounts
 ('johndoe@my.cspc.edu.ph', '25123456', '$2b$12$9yGI7zOzRNxlmV5bX4i84eXujMFv86nOTWpw2H8IYuiIQjqmGWbQC', 'student', 'John Doe'),
 ('janesmith@my.cspc.edu.ph', '25123457', '$2b$12$9yGI7zOzRNxlmV5bX4i84eXujMFv86nOTWpw2H8IYuiIQjqmGWbQC', 'student', 'Jane Smith'),
-('michaelbrown@my.cspc.edu.ph', '25123458', '$2b$12$9yGI7zOzRNxlmV5bX4i84eXujMFv86nOTWpw2H8IYuiIQjqmGWbQC', 'student', 'Michael Brown'),
-('emilywhite@my.cspc.edu.ph', '25123459', '$2b$12$9yGI7zOzRNxlmV5bX4i84eXujMFv86nOTWpw2H8IYuiIQjqmGWbQC', 'student', 'Emily White');
 
 -- Insert Sample Reservations
 INSERT INTO reservations (classroom_id, user_id, reservation_date, start_time, end_time, purpose, status) VALUES
