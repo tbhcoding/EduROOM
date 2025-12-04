@@ -34,6 +34,14 @@ def show_analytics_dashboard(page, user_id, role, name):
     approval_stats = AnalyticsModel.get_approval_rate()
     peak_hours = AnalyticsModel.get_peak_hours()
     
+    # NEW: Fetch derived insights
+    weekly_comparison = AnalyticsModel.get_weekly_comparison()
+    busiest_day = AnalyticsModel.get_busiest_day()
+    avg_daily = AnalyticsModel.get_average_daily_reservations()
+    most_active = AnalyticsModel.get_most_active_faculty()
+    room_recommendation = AnalyticsModel.get_room_recommendation()
+    pending_status = AnalyticsModel.get_pending_bottleneck()
+    
     # Summary Cards
     summary_cards = ft.Row([
         create_stat_card("Total Reservations", str(summary['total']), ICONS.CALENDAR_MONTH, "#2196F3"),
@@ -52,6 +60,16 @@ def show_analytics_dashboard(page, user_id, role, name):
         create_insight_card("Approval Rate", approval_rate_text, ICONS.THUMB_UP, "#00BCD4"),
         create_insight_card("Most Popular", most_popular_room, ICONS.STAR, "#FFC107"),
     ], spacing=10, wrap=True)
+    
+    # NEW: Derived Insights Section
+    derived_insights = create_derived_insights_panel(
+        weekly_comparison, 
+        busiest_day, 
+        avg_daily, 
+        most_active, 
+        room_recommendation,
+        pending_status
+    )
     
     page.controls.clear()
     page.add(
@@ -75,8 +93,12 @@ def show_analytics_dashboard(page, user_id, role, name):
             insights_cards,
             ft.Container(height=20),
             
+            # NEW: Derived Insights Panel
+            derived_insights,
+            ft.Container(height=20),
+            
             # Analytics Section Title
-            ft.Text("Reservation Analytics", size=18, weight=ft.FontWeight.BOLD),
+            ft.Text("Detailed Analytics", size=18, weight=ft.FontWeight.BOLD),
             ft.Container(height=10),
             
             # Status Distribution
@@ -401,6 +423,172 @@ def create_time_slots_table(time_slots):
         bgcolor="white"
     )
 
+def create_derived_insights_panel(weekly, busiest_day, avg_daily, most_active, room_rec, pending):
+    """Create panel showing derived insights and recommendations"""
+    
+    # Weekly trend indicator
+    if weekly['change'] > 0:
+        trend_icon = ICONS.TRENDING_UP
+        trend_color = "#4CAF50"
+        trend_text = f"↑ {weekly['change']}% vs last week"
+    elif weekly['change'] < 0:
+        trend_icon = ICONS.TRENDING_DOWN
+        trend_color = "#F44336"
+        trend_text = f"↓ {abs(weekly['change'])}% vs last week"
+    else:
+        trend_icon = ICONS.TRENDING_FLAT
+        trend_color = "#9E9E9E"
+        trend_text = "No change vs last week"
+    
+    # Pending status color
+    pending_colors = {
+        'good': '#4CAF50',
+        'normal': '#FF9800',
+        'warning': '#F44336'
+    }
+    pending_color = pending_colors.get(pending['status'], '#9E9E9E')
+    
+    return ft.Container(
+        content=ft.Column([
+            ft.Text("📊 Derived Insights & Recommendations", size=18, weight=ft.FontWeight.BOLD),
+            ft.Container(height=10),
+            
+            ft.Row([
+                # Weekly Trend Card
+                ft.Container(
+                    content=ft.Column([
+                        ft.Row([
+                            ft.Icon(trend_icon, color=trend_color, size=24),
+                            ft.Text("Weekly Trend", weight=ft.FontWeight.BOLD),
+                        ], spacing=10),
+                        ft.Text(f"This week: {weekly['this_week']} reservations", size=13),
+                        ft.Text(f"Last week: {weekly['last_week']} reservations", size=13),
+                        ft.Container(
+                            content=ft.Text(trend_text, color="white", size=12, weight=ft.FontWeight.BOLD),
+                            bgcolor=trend_color,
+                            padding=8,
+                            border_radius=5,
+                            margin=ft.margin.only(top=5)
+                        )
+                    ], spacing=5),
+                    padding=15,
+                    border=ft.border.all(1, "#E0E0E0"),
+                    border_radius=10,
+                    width=250,
+                    bgcolor="white"
+                ),
+                
+                # Busiest Day Card
+                ft.Container(
+                    content=ft.Column([
+                        ft.Row([
+                            ft.Icon(ICONS.EVENT, color="#2196F3", size=24),
+                            ft.Text("Busiest Day", weight=ft.FontWeight.BOLD),
+                        ], spacing=10),
+                        ft.Text(busiest_day['day_name'] if busiest_day['day_name'] else "N/A", 
+                               size=24, weight=ft.FontWeight.BOLD, color="#2196F3"),
+                        ft.Text(f"{busiest_day['count']} approved reservations", size=13),
+                        ft.Container(
+                            content=ft.Text("Peak booking day", color="white", size=12),
+                            bgcolor="#2196F3",
+                            padding=8,
+                            border_radius=5,
+                            margin=ft.margin.only(top=5)
+                        )
+                    ], spacing=5),
+                    padding=15,
+                    border=ft.border.all(1, "#E0E0E0"),
+                    border_radius=10,
+                    width=250,
+                    bgcolor="white"
+                ),
+                
+                # Average Daily Card
+                ft.Container(
+                    content=ft.Column([
+                        ft.Row([
+                            ft.Icon(ICONS.SHOW_CHART, color="#9C27B0", size=24),
+                            ft.Text("Daily Average", weight=ft.FontWeight.BOLD),
+                        ], spacing=10),
+                        ft.Text(f"{avg_daily}", size=24, weight=ft.FontWeight.BOLD, color="#9C27B0"),
+                        ft.Text("reservations per day", size=13),
+                        ft.Container(
+                            content=ft.Text("Last 30 days", color="white", size=12),
+                            bgcolor="#9C27B0",
+                            padding=8,
+                            border_radius=5,
+                            margin=ft.margin.only(top=5)
+                        )
+                    ], spacing=5),
+                    padding=15,
+                    border=ft.border.all(1, "#E0E0E0"),
+                    border_radius=10,
+                    width=250,
+                    bgcolor="white"
+                ),
+            ], spacing=10, wrap=True),
+            
+            ft.Container(height=15),
+            
+            ft.Row([
+                # Most Active Faculty Card
+                ft.Container(
+                    content=ft.Column([
+                        ft.Row([
+                            ft.Icon(ICONS.PERSON_PIN, color="#FF5722", size=24),
+                            ft.Text("Most Active Faculty", weight=ft.FontWeight.BOLD),
+                        ], spacing=10),
+                        ft.Text(most_active['full_name'], size=16, weight=ft.FontWeight.BOLD),
+                        ft.Text(f"{most_active['reservation_count']} reservations this month", size=13),
+                    ], spacing=5),
+                    padding=15,
+                    border=ft.border.all(1, "#E0E0E0"),
+                    border_radius=10,
+                    width=250,
+                    bgcolor="white"
+                ),
+                
+                # Room Recommendation Card
+                ft.Container(
+                    content=ft.Column([
+                        ft.Row([
+                            ft.Icon(ICONS.LIGHTBULB, color="#FFC107", size=24),
+                            ft.Text("Recommendation", weight=ft.FontWeight.BOLD),
+                        ], spacing=10),
+                        ft.Text(room_rec['room_name'], size=16, weight=ft.FontWeight.BOLD),
+                        ft.Text(room_rec['message'], size=12, italic=True),
+                    ], spacing=5),
+                    padding=15,
+                    border=ft.border.all(1, "#E0E0E0"),
+                    border_radius=10,
+                    width=250,
+                    bgcolor="white"
+                ),
+                
+                # Pending Status Card
+                ft.Container(
+                    content=ft.Column([
+                        ft.Row([
+                            ft.Icon(ICONS.PENDING_ACTIONS, color=pending_color, size=24),
+                            ft.Text("Approval Queue", weight=ft.FontWeight.BOLD),
+                        ], spacing=10),
+                        ft.Text(f"{pending['pending_count']}", size=24, weight=ft.FontWeight.BOLD, color=pending_color),
+                        ft.Text(pending['message'], size=12),
+                    ], spacing=5),
+                    padding=15,
+                    border=ft.border.all(1, "#E0E0E0"),
+                    border_radius=10,
+                    width=250,
+                    bgcolor="white"
+                ),
+            ], spacing=10, wrap=True),
+            
+        ]),
+        padding=20,
+        border=ft.border.all(2, "#2196F3"),
+        border_radius=15,
+        bgcolor="#F5F5F5"
+    )
 
 def create_utilization_table(utilization):
     """Create table for classroom utilization"""
