@@ -6,7 +6,7 @@ from views.dashboard_view import show_dashboard
 def show_login(page):
     """Display the login page with database authentication"""
     def on_focus(tf):
-        tf.border_color = "#0097b2"
+        tf.border_color = "#3775a9"
         tf.update()
 
     def on_blur(tf):
@@ -105,9 +105,9 @@ def show_login(page):
     
     LOGIN_BUTTON_STYLE = ft.ButtonStyle(
         shape=ft.RoundedRectangleBorder(radius=30),
-        bgcolor="#5A5A5A", 
+        bgcolor="#3775a9", 
         color="white",
-        overlay_color="#0097b2",
+        overlay_color="#ffd141",
     )
 
     page.controls.clear()

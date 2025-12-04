@@ -4,8 +4,8 @@ from views.login_view import show_login
 def main(page: ft.Page):
     page.title = "Classroom Reservation System"
     try:
-        page.window.width = 900
-        page.window.height = 700
+        page.window.width = 1920
+        page.window.height = 1080
     except Exception:
         pass
 

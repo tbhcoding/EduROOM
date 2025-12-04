@@ -79,6 +79,7 @@ CREATE TABLE classrooms (
     building VARCHAR(100) NOT NULL,
     capacity INT NOT NULL,
     status ENUM('Available', 'Occupied', 'Maintenance') DEFAULT 'Available',
+    image_url VARCHAR(255) DEFAULT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     INDEX idx_status (status)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
@@ -116,17 +117,17 @@ CREATE TABLE activity_logs (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- Insert Sample Classrooms
-INSERT INTO classrooms (room_name, building, capacity, status) VALUES
-('Room 101', 'Main Building', 30, 'Available'),
-('Room 102', 'Main Building', 25, 'Available'),
-('Room 103', 'Main Building', 35, 'Available'),
-('Lab 201', 'Science Building', 20, 'Available'),
-('Lab 202', 'Science Building', 15, 'Available'),
-('Lab 203', 'Science Building', 18, 'Available'),
-('Room 301', 'Engineering Building', 40, 'Available'),
-('Room 302', 'Engineering Building', 30, 'Available'),
-('Computer Lab 1', 'IT Building', 25, 'Available'),
-('Computer Lab 2', 'IT Building', 25, 'Available');
+INSERT INTO classrooms (room_name, building, capacity, status, image_url) VALUES
+('Room 101', 'Main Building', 30, 'Available', NULL),
+('Room 102', 'Main Building', 25, 'Available', NULL),
+('Room 103', 'Main Building', 35, 'Available', NULL),
+('Lab 201', 'Science Building', 20, 'Available', NULL),
+('Lab 202', 'Science Building', 15, 'Available', NULL),
+('Lab 203', 'Science Building', 18, 'Available', NULL),
+('Room 301', 'Engineering Building', 40, 'Available', NULL),
+('Room 302', 'Engineering Building', 30, 'Available', NULL),
+('Computer Lab 1', 'IT Building', 25, 'Available', '../assets/images/computer-lab-1.png'),
+('Computer Lab 2', 'IT Building', 25, 'Available', NULL); -- NULL will use default image in app
 
 -- Insert Test Users
 -- NOTE: Password hashes correspond to:

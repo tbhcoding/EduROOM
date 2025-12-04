@@ -87,6 +87,27 @@ class ClassroomModel:
         db.disconnect()
         return classroom
 
+    @staticmethod
+    def get_classroom_reservations(classroom_id):
+        """Get all reservations for a specific classroom with user details"""
+        db.connect()
+        query = """
+            SELECT 
+                r.id,
+                r.reservation_date,
+                r.start_time,
+                r.end_time,
+                r.purpose,
+                r.status,
+                u.full_name as reserved_by
+            FROM reservations r
+            JOIN users u ON r.user_id = u.id
+            WHERE r.classroom_id = %s
+            ORDER BY r.reservation_date DESC, r.start_time ASC
+        """
+        reservations = db.fetch_all(query, (classroom_id,))
+        db.disconnect()
+        return reservations
 
 class ReservationModel:
     @staticmethod
