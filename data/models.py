@@ -177,6 +177,54 @@ class ReservationModel:
         result = db.fetch_one(query, tuple(params))
         db.disconnect()
         return result['count'] == 0
+    
+    @staticmethod
+    def get_reservation_by_id(reservation_id):
+        """Get a single reservation by ID"""
+        db.connect()
+        query = """
+            SELECT r.*, c.room_name, c.building
+            FROM reservations r
+            JOIN classrooms c ON r.classroom_id = c.id
+            WHERE r.id = %s
+        """
+        reservation = db.fetch_one(query, (reservation_id,))
+        db.disconnect()
+        return reservation
+    
+    @staticmethod
+    def update_reservation(reservation_id, reservation_date, start_time, end_time, purpose):
+        """Update an existing reservation"""
+        db.connect()
+        query = """
+            UPDATE reservations 
+            SET reservation_date = %s, start_time = %s, end_time = %s, purpose = %s, status = 'pending'
+            WHERE id = %s
+        """
+        result = db.execute_query(query, (reservation_date, start_time, end_time, purpose, reservation_id))
+        db.disconnect()
+        return result is not None
+    
+    @staticmethod
+    def cancel_reservation(reservation_id):
+        """Cancel a reservation"""
+        db.connect()
+        query = "UPDATE reservations SET status = 'cancelled' WHERE id = %s"
+        result = db.execute_query(query, (reservation_id,))
+        db.disconnect()
+        return result is not None
+    
+    @staticmethod
+    def can_modify_reservation(reservation_id, user_id):
+        """Check if user can modify this reservation"""
+        db.connect()
+        query = """
+            SELECT id FROM reservations 
+            WHERE id = %s AND user_id = %s AND status IN ('pending', 'approved')
+        """
+        result = db.fetch_one(query, (reservation_id, user_id))
+        db.disconnect()
+        return result is not None
 
 
 class ActivityLogModel:
@@ -190,3 +238,4 @@ class ActivityLogModel:
         """
         db.execute_query(query, (user_id, action, details, ip_address))
         db.disconnect()
+        
