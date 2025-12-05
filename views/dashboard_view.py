@@ -8,8 +8,61 @@ def show_dashboard(page, user_id, role, name):
 
     def logout_click(e):
         from views.login_view import show_login
+        close_drawer(e)
         page.session.clear()
         show_login(page)
+
+    def open_drawer(e):
+        page.open(drawer)
+    
+    def close_drawer(e):
+        page.close(drawer)
+    
+    def toggle_theme(e):
+        # Toggle between light and dark theme
+        page.theme_mode = ft.ThemeMode.DARK if page.theme_mode == ft.ThemeMode.LIGHT else ft.ThemeMode.LIGHT
+        page.update()
+    
+    def open_profile(e):
+        close_drawer(e)
+        # Add your profile view function here
+        page.snack_bar = ft.SnackBar(ft.Text("Profile feature coming soon!"))
+        page.snack_bar.open = True
+        page.update()
+    
+    # Create settings drawer
+    drawer = ft.NavigationDrawer(
+        position=ft.NavigationDrawerPosition.END,
+        controls=[
+            ft.Container(
+                content=ft.Row([
+                    ft.Icon(ft.Icons.PERSON, size=40),
+                    ft.Column([
+                        ft.Text(name, size=16, weight=ft.FontWeight.BOLD),
+                        ft.Text(role.upper(), size=12, color=ft.Colors.GREY_600)
+                    ], spacing=2)
+                ], spacing=15),
+                padding=20,
+            ),
+            ft.Divider(thickness=2),
+            ft.ListTile(
+                leading=ft.Icon(ft.Icons.PERSON),
+                title=ft.Text("Profile"),
+                on_click=open_profile
+            ),
+            ft.ListTile(
+                leading=ft.Icon(ft.Icons.PALETTE),
+                title=ft.Text("Toggle Theme"),
+                on_click=toggle_theme
+            ),
+            ft.ListTile(
+                leading=ft.Icon(ft.Icons.LOGOUT),
+                title=ft.Text("Logout"),
+                on_click=logout_click
+            ),
+        ft.Container(height=20),
+        ],
+    )
 
     def open_reservation_form(classroom_id):
         from views.reservation_view import show_reservation_form
@@ -81,10 +134,10 @@ def show_dashboard(page, user_id, role, name):
             alignment=ft.MainAxisAlignment.SPACE_AROUND,
         )
 
-        logout = ft.IconButton(icon=ft.Icons.LOGOUT, tooltip="Logout", on_click=logout_click)
+        settings = ft.IconButton(icon=ft.Icons.SETTINGS, tooltip="Settings", on_click=open_drawer)
 
         header_row = ft.Row(
-            [logo, navbar_block, logout],
+            [logo, navbar_block, settings],
             alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
             vertical_alignment=ft.CrossAxisAlignment.CENTER
         )
