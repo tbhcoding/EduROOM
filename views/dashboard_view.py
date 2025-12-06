@@ -2,6 +2,7 @@ import flet as ft
 from utils.config import ICONS, COLORS
 from data.models import ClassroomModel
 from views.schedule_view import show_classroom_schedule
+from views.profile_view import show_profile
 
 def show_dashboard(page, user_id, role, name):
     """Display main dashboard based on roles"""
@@ -25,10 +26,7 @@ def show_dashboard(page, user_id, role, name):
     
     def open_profile(e):
         close_drawer(e)
-        # Add your profile view function here
-        page.snack_bar = ft.SnackBar(ft.Text("Profile feature coming soon!"))
-        page.snack_bar.open = True
-        page.update()
+        show_profile(page, user_id, role, name)
     
     # Create settings drawer
     drawer = ft.NavigationDrawer(

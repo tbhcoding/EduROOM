@@ -66,6 +66,32 @@ class UserModel:
         result = db.fetch_one(query, (id_number,))
         db.disconnect()
         return result is not None
+    
+    @staticmethod
+    def change_password(user_id, current_password, new_password):
+        """Change user password after verifying current password"""
+        db.connect()
+        
+        # First, get the user's current password hash
+        query = "SELECT password_hash FROM users WHERE id = %s"
+        user = db.fetch_one(query, (user_id,))
+        
+        if not user:
+            db.disconnect()
+            return False, "User not found"
+        
+        # Verify current password
+        if not verify_password(current_password, user['password_hash']):
+            db.disconnect()
+            return False, "Current password is incorrect"
+        
+        # Hash new password and update
+        new_password_hash = hash_password(new_password)
+        update_query = "UPDATE users SET password_hash = %s WHERE id = %s"
+        db.execute_query(update_query, (new_password_hash, user_id))
+        db.disconnect()
+        
+        return True, "Password changed successfully"
 
 
 class ClassroomModel:
