@@ -3,6 +3,13 @@ from utils.config import ICONS, COLORS
 from data.models import ReservationModel, ActivityLogModel
 from components.app_header import create_app_header
 
+try:
+    from utils.websocket_client import realtime
+    REALTIME_ENABLED = True
+except ImportError:
+    REALTIME_ENABLED = False
+
+
 def show_admin_panel(page, user_id, role, name):
     """Display admin panel for managing reservations from database"""
 
@@ -11,6 +18,23 @@ def show_admin_panel(page, user_id, role, name):
   
     if role != "admin":
         return
+    
+    if REALTIME_ENABLED:
+        def on_new_reservation(data):
+            """Handle new reservation event"""
+            page.open(ft.SnackBar(
+                content=ft.Text(f"🔔 {data['payload'].get('message', 'New reservation!')}"),
+                bgcolor=ft.Colors.BLUE,
+                duration=4000
+            ))
+            page.update()
+            # Auto-refresh the panel
+            refresh_panel()
+        
+        # Register callback and connect
+        realtime.on("new_reservation", on_new_reservation)
+        if not realtime.connected:
+            realtime.connect()
     
     def back_to_dashboard(e):
         from views.dashboard_view import show_dashboard

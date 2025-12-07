@@ -4,6 +4,12 @@ from data.models import ReservationModel, ActivityLogModel
 from datetime import datetime
 from components.app_header import create_app_header
 
+try:
+    from utils.websocket_client import realtime
+    REALTIME_ENABLED = True
+except ImportError:
+    REALTIME_ENABLED = False
+
 def show_my_reservations(page, user_id, role, name):
     """Display faculty member's reservations from database"""
     
@@ -20,6 +26,35 @@ def show_my_reservations(page, user_id, role, name):
     def refresh_view():
         """Refresh the reservations view"""
         show_my_reservations(page, user_id, role, name)
+    
+     # Real-time updates setup
+    if REALTIME_ENABLED:
+        def on_reservation_approved(data):
+            """Handle reservation approved event"""
+            if data['payload'].get('user_id') == user_id:
+                page.open(ft.SnackBar(
+                    content=ft.Text(f"✅ {data['payload'].get('message', 'Reservation approved!')}"),
+                    bgcolor=ft.Colors.GREEN,
+                    duration=4000
+                ))
+                page.update()
+                refresh_view()
+        
+        def on_reservation_rejected(data):
+            """Handle reservation rejected event"""
+            if data['payload'].get('user_id') == user_id:
+                page.open(ft.SnackBar(
+                    content=ft.Text(f"❌ {data['payload'].get('message', 'Reservation rejected')}"),
+                    bgcolor=ft.Colors.RED,
+                    duration=4000
+                ))
+                page.update()
+                refresh_view()
+        
+        realtime.on("reservation_approved", on_reservation_approved)
+        realtime.on("reservation_rejected", on_reservation_rejected)
+        if not realtime.connected:
+            realtime.connect()
     
     def show_edit_dialog(reservation):
         """Show dialog to edit a reservation"""

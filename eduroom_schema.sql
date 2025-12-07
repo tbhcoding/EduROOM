@@ -48,11 +48,22 @@
 CREATE DATABASE IF NOT EXISTS classroom_reservation_db;
 USE classroom_reservation_db;
 
--- Drop existing tables if they exist (for fresh setup)
+-- =====================================================
+-- DROP EXISTING TABLES SAFELY (INCLUDING NOTIFICATIONS)
+-- =====================================================
+SET FOREIGN_KEY_CHECKS = 0;
+
+DROP TABLE IF EXISTS notifications;
 DROP TABLE IF EXISTS activity_logs;
 DROP TABLE IF EXISTS reservations;
 DROP TABLE IF EXISTS classrooms;
 DROP TABLE IF EXISTS users;
+
+SET FOREIGN_KEY_CHECKS = 1;
+
+-- =====================================================
+-- CREATE TABLES
+-- =====================================================
 
 -- Create Users Table
 CREATE TABLE users (
@@ -126,6 +137,10 @@ CREATE TABLE IF NOT EXISTS notifications (
     INDEX idx_user_read (user_id, is_read),
     INDEX idx_created_at (created_at)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- =====================================================
+-- INSERT SAMPLE DATA
+-- =====================================================
 
 -- Insert Real Classrooms
 INSERT INTO classrooms (room_name, building, capacity, status, image_url) VALUES
@@ -211,6 +226,10 @@ INSERT INTO reservations (classroom_id, user_id, reservation_date, start_time, e
 (1, 2, '2025-12-10', '09:00:00', '11:00:00', 'Advanced Programming', 'pending'),
 (2, 3, '2025-12-10', '13:00:00', '15:00:00', 'Business Intelligence Workshop', 'pending'),
 (6, 4, '2025-12-10', '10:00:00', '12:00:00', 'Capstone Project Presentation', 'pending');
+
+-- =====================================================
+-- VERIFICATION QUERIES
+-- =====================================================
 
 -- Verify Setup
 SELECT '✓ Database setup complete!' as 'Status';
