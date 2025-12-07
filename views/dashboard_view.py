@@ -41,7 +41,7 @@ def show_dashboard(page, user_id, role, name):
 
     # Search and filter state
     search_query = ft.Ref[ft.TextField]()
-    classroom_list_ref = ft.Ref[ft.Column]()
+    classroom_list_ref = ft.Ref[ft.Row]()
     result_count_ref = ft.Ref[ft.Text]()
     date_button_ref = ft.Ref[ft.Container]()
     start_time_button_ref = ft.Ref[ft.Container]()
@@ -61,12 +61,18 @@ def show_dashboard(page, user_id, role, name):
         def on_reserve_click(e):
             open_reservation_form(room["id"])
 
-        reserve_btn = ft.ElevatedButton(
+        reserve_btn = ft.OutlinedButton(
             "Reserve",
             on_click=on_reserve_click,
             disabled=not reserve_enabled,
             height=35,
-            expand=True
+            expand=True,
+            style=ft.ButtonStyle(
+                shape=ft.RoundedRectangleBorder(radius=5),
+                side=ft.BorderSide(2, "#F5C518"),  # Yellow border
+                color=ft.Colors.with_opacity(1, "#FFFFFF"),  # Yellow text
+                bgcolor=ft.Colors.with_opacity(1, "#F5C518"),  # Yellow text
+            )
         )
 
         if role in ("admin", "student"):
@@ -81,7 +87,13 @@ def show_dashboard(page, user_id, role, name):
             "View Schedule",
             on_click=view_schedule_click,
             height=35,
-            expand=True
+            expand=True,
+            style=ft.ButtonStyle(
+                shape=ft.RoundedRectangleBorder(radius=5),
+                side=ft.BorderSide(2, "#3B82F6"),  # Blue border
+                color=ft.Colors.with_opacity(1, "#FFFFFF"),  # Blue text
+                bgcolor=ft.Colors.with_opacity(1, "#3B82F6"),  # Yellow text
+            )
         )
 
         return ft.Card(
@@ -196,7 +208,8 @@ def show_dashboard(page, user_id, role, name):
                 )
             ]
         else:
-            classroom_list_ref.current.controls = create_grid_rows(filtered_cards)
+            # Just add all cards directly to the Row with wrap=True
+            classroom_list_ref.current.controls = filtered_cards
         
         page.update()
     
@@ -319,56 +332,62 @@ def show_dashboard(page, user_id, role, name):
         page.open(ft.SnackBar(content=ft.Text(message)))
         page.update()
 
-    def create_grid_rows(cards):
-        """Organize cards into rows of 3"""
-        rows = []
-        for i in range(0, len(cards), 3):
-            row_cards = cards[i:i+3]
-            rows.append(
-                ft.Row(
-                    controls=row_cards,
-                    spacing=20,
-                    alignment=ft.MainAxisAlignment.CENTER,
-                    wrap=False
-                )
-            )
-        return rows
-
     # Create dropdown-style picker buttons
     date_picker_button = ft.Container(
         ref=date_button_ref,
-        content=ft.Text("Select Date", size=14),
+        content=ft.Row(
+        controls=[
+                ft.Text("Select Date", size=14),
+                ft.Text("▼", size=14, color=ft.Colors.BLUE) 
+            ],
+            alignment=ft.MainAxisAlignment.SPACE_BETWEEN,  
+            vertical_alignment=ft.CrossAxisAlignment.CENTER  
+        ),
         padding=ft.padding.symmetric(horizontal=15, vertical=12),
-        border=ft.border.all(1, ft.Colors.GREY_400),
         border_radius=8,
         bgcolor=ft.Colors.WHITE,
         on_click=open_date_picker,
         ink=True,
-        width=180
+        width=150,
+        alignment=ft.alignment.center
     )
     
     start_time_button = ft.Container(
         ref=start_time_button_ref,
-        content=ft.Text("Start Time", size=14),
+        content=ft.Row(
+        controls=[
+                ft.Text("Start Time", size=14),
+                ft.Text("▼", size=14, color=ft.Colors.BLUE) 
+            ],
+            alignment=ft.MainAxisAlignment.SPACE_BETWEEN,  
+            vertical_alignment=ft.CrossAxisAlignment.CENTER
+        ),
         padding=ft.padding.symmetric(horizontal=15, vertical=12),
-        border=ft.border.all(1, ft.Colors.GREY_400),
         border_radius=8,
         bgcolor=ft.Colors.WHITE,
         on_click=open_start_time_picker,
         ink=True,
-        width=150
+        width=150,
+        alignment=ft.alignment.center
     )
     
     end_time_button = ft.Container(
         ref=end_time_button_ref,
-        content=ft.Text("End Time", size=14),
+        content=ft.Row(
+        controls=[
+                ft.Text("End Time", size=14),
+                ft.Text("▼", size=14, color=ft.Colors.BLUE) 
+            ],
+            alignment=ft.MainAxisAlignment.SPACE_BETWEEN,  
+            vertical_alignment=ft.CrossAxisAlignment.CENTER
+        ),
         padding=ft.padding.symmetric(horizontal=15, vertical=12),
-        border=ft.border.all(1, ft.Colors.GREY_400),
         border_radius=8,
         bgcolor=ft.Colors.WHITE,
         on_click=open_end_time_picker,
         ink=True,
-        width=150
+        width=150,
+        alignment=ft.alignment.center
     )
     
     apply_button = ft.ElevatedButton(
@@ -378,8 +397,9 @@ def show_dashboard(page, user_id, role, name):
         on_click=apply_filter_click,
         disabled=True,
         height=45,
-        bgcolor=ft.Colors.BLUE,
+        bgcolor="#2C5DC5",
         color=ft.Colors.WHITE,
+        width=100
     )
     
     clear_button = ft.OutlinedButton(
@@ -389,53 +409,61 @@ def show_dashboard(page, user_id, role, name):
         height=45,
     )
 
-    # Initial classroom display
+    # Initial classroom display - create cards
     classroom_cards = [create_classroom_card(room) for room in all_classrooms]
-    grid_rows = create_grid_rows(classroom_cards)
 
     # Build page layout
     page.controls.clear()
+    # page.bgcolor = ft.Colors.WHITE
+    # page.update()
     page.add(
         ft.Column([
             header,
             ft.Container(
-                content=ft.Text("Available Classrooms", size=32, font_family="Montserrat Bold", weight=ft.FontWeight.BOLD),
-                padding=ft.padding.only(left=30, top=20), 
-                alignment=ft.alignment.center
+                content=ft.Text("Available Classrooms", size=32, color="#4D4848", font_family="Montserrat Bold", weight=ft.FontWeight.BOLD),
+                alignment=ft.alignment.center,
+                padding=ft.padding.all(5)
             ),
             ft.Container(height=10),
             # Search bar
             ft.Container(
-                content=ft.TextField(
-                    ref=search_query,
-                    hint_text="Search by name, building, capacity...",
-                    prefix_icon=ft.Icons.SEARCH,
-                    on_change=search_classrooms,
-                    border_radius=10,
+                content=ft.Container(
+                    content=ft.TextField(
+                        ref=search_query,
+                        hint_text="Search for Classroom",
+                        prefix_icon=ft.Icons.SEARCH,
+                        on_change=search_classrooms,
+                        border="none",
+                        border_color="#F3F4F6",
+                        fill_color="#F3F4F6", 
+                        focused_border_color="transparent",
+                        hover_color="transparent",
+                    ),
+                    padding=ft.padding.symmetric(horizontal=30),
                 ),
-                padding=ft.padding.symmetric(horizontal=30),
+                padding=ft.padding.only(left=20),
+                margin=ft.margin.symmetric(horizontal=20),
+                bgcolor="#F3F4F6",
+                border_radius=ft.border_radius.all(10),
             ),
             ft.Container(height=10),
             # Filter bar
             ft.Container(
-                content=ft.Card(
-                    elevation=2,
                     content=ft.Container(
-                        padding=ft.padding.all(20),
                         content=ft.Row([
-                            ft.Icon(ft.Icons.FILTER_LIST, size=20, color=ft.Colors.GREY_700),
+                            ft.Text("Filter by:"),
                             date_picker_button,
                             start_time_button,
                             end_time_button,
                             apply_button,
                             clear_button
                         ], 
-                        spacing=15, 
-                        alignment=ft.MainAxisAlignment.START,
+                        spacing=20, 
+                        alignment=ft.MainAxisAlignment.CENTER,
                         vertical_alignment=ft.CrossAxisAlignment.CENTER)
-                    )
                 ),
-                padding=ft.padding.symmetric(horizontal=30)
+                padding=ft.padding.symmetric(horizontal=30),
+                bgcolor=ft.Colors.WHITE 
             ),
             # Result count
             ft.Container(
@@ -447,16 +475,23 @@ def show_dashboard(page, user_id, role, name):
                 ),
                 padding=ft.padding.symmetric(horizontal=30, vertical=10)
             ),
-            # Scrollable classroom grid
+            # Scrollable classroom grid - now using Row with wrap
             ft.Container(
-                content=ft.Column(
-                    ref=classroom_list_ref,
-                    controls=grid_rows,
-                    spacing=20,
-                    scroll=ft.ScrollMode.AUTO
+                content=ft.Container(
+                    content=ft.Row(
+                        ref=classroom_list_ref,
+                        controls=classroom_cards,
+                        spacing=20,
+                        run_spacing=20,
+                        wrap=True,
+                        scroll=ft.ScrollMode.AUTO,
+                        alignment=ft.MainAxisAlignment.START
+                    ),
+                    width=1360,  # Fixed width to center the grid container
                 ),
                 padding=ft.padding.symmetric(horizontal=30),
-                expand=True
+                expand=True,
+                alignment=ft.alignment.top_center
             )
         ], spacing=0, expand=True)
     )

@@ -176,8 +176,8 @@ def create_app_header(page, user_id, role, name, current_page="classrooms"):
             ft.PopupMenuItem(
                 content=ft.Container(
                     content=ft.Row([
-                        ft.Text("View All", size=14, weight=ft.FontWeight.BOLD, color="#2196F3"),
-                        ft.Icon(ft.Icons.ARROW_FORWARD, size=18, color="#2196F3")
+                        ft.Text("View All", size=14, weight=ft.FontWeight.BOLD, color="#1E3A8A"),
+                        ft.Icon(ft.Icons.ARROW_FORWARD, size=18, color="#1E3A8A")
                     ], alignment=ft.MainAxisAlignment.CENTER, spacing=5),
                     padding=5,
                 ),
