@@ -14,9 +14,8 @@ def show_dashboard(page, user_id, role, name):
     except Exception:
         pass  # Silently fail if database is unavailable
 
-    # Create the header and drawer
+    # Create header with photo
     header, drawer = create_app_header(page, user_id, role, name, current_page="classrooms")
-
     # State variables
     all_classrooms = []
     current_classrooms = [] 

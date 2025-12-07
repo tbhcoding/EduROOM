@@ -27,6 +27,8 @@ def main(page: ft.Page):
     }
     page.theme = ft.Theme(font_family="Roboto")
 
+    page.theme_mode = ft.ThemeMode.LIGHT
+
     # Start with login page
     show_login(page)
 

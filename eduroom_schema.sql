@@ -73,6 +73,7 @@ CREATE TABLE users (
     password_hash VARCHAR(255) NOT NULL,
     role ENUM('admin', 'faculty', 'student') NOT NULL,
     full_name VARCHAR(100) NOT NULL,
+    photo VARCHAR(255),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     is_active BOOLEAN DEFAULT TRUE,
     INDEX idx_email (email),
@@ -162,23 +163,25 @@ INSERT INTO classrooms (room_name, building, capacity, status, image_url) VALUES
 -- Faculty: faculty2025
 -- Student: student2025
 
-INSERT INTO users (email, id_number, password_hash, role, full_name) VALUES
+INSERT INTO users (email, id_number, password_hash, role, full_name, photo) VALUES
 -- Admin Account
-('admin@cspc.edu.ph', '00000000', '$2b$12$PUPdb6Nzizg47zWbC7fCQO46bKTEfSkWrY.RrqFGX823lz2fOhONG', 'admin', 'Admin User'),
+('admin@cspc.edu.ph', '00000000', '$2b$12$PUPdb6Nzizg47zWbC7fCQO46bKTEfSkWrY.RrqFGX823lz2fOhONG', 'admin', 'Admin User', '../assets/images/default-user.png'),
 
 -- Faculty Accounts
-('ibo@my.cspc.edu.ph', '20231001', '$2b$12$tJzBR7wwDZ6mgx.dW8dk7OVo.RA13eIMK2HZX3BDvLqZtXIEGClyu', 'faculty', 'Mr. Ibo'),
-('colle@my.cspc.edu.ph', '20231002', '$2b$12$tJzBR7wwDZ6mgx.dW8dk7OVo.RA13eIMK2HZX3BDvLqZtXIEGClyu', 'faculty', 'Mr. Colle'),
-('fortuno@my.cspc.edu.ph', '20231003', '$2b$12$tJzBR7wwDZ6mgx.dW8dk7OVo.RA13eIMK2HZX3BDvLqZtXIEGClyu', 'faculty', 'Ms. Fortuno'),
-('pandes@my.cspc.edu.ph', '20231004', '$2b$12$tJzBR7wwDZ6mgx.dW8dk7OVo.RA13eIMK2HZX3BDvLqZtXIEGClyu', 'faculty', 'Ms. Pandes'),
-('onesa@my.cspc.edu.ph', '20231005', '$2b$12$tJzBR7wwDZ6mgx.dW8dk7OVo.RA13eIMK2HZX3BDvLqZtXIEGClyu', 'faculty', 'Mrs. Onesa'),
-('olleres@my.cspc.edu.ph', '20231006', '$2b$12$tJzBR7wwDZ6mgx.dW8dk7OVo.RA13eIMK2HZX3BDvLqZtXIEGClyu', 'faculty', 'Mr. Olleres'),
-('buena@my.cspc.edu.ph', '20231007', '$2b$12$tJzBR7wwDZ6mgx.dW8dk7OVo.RA13eIMK2HZX3BDvLqZtXIEGClyu', 'faculty', 'Mr. Buena'),
-('aurillas@my.cspc.edu.ph', '20231008', '$2b$12$tJzBR7wwDZ6mgx.dW8dk7OVo.RA13eIMK2HZX3BDvLqZtXIEGClyu', 'faculty', 'Mrs. Aurillas'),
+('ibo@my.cspc.edu.ph', '20231001', '$2b$12$tJzBR7wwDZ6mgx.dW8dk7OVo.RA13eIMK2HZX3BDvLqZtXIEGClyu', 'faculty', 'Mr. Ibo', '../assets/images/allan-ibo.png'),
+('colle@my.cspc.edu.ph', '20231002', '$2b$12$tJzBR7wwDZ6mgx.dW8dk7OVo.RA13eIMK2HZX3BDvLqZtXIEGClyu', 'faculty', 'Mr. Colle', '../assets/images/default-user.png'),
+('fortuno@my.cspc.edu.ph', '20231003', '$2b$12$tJzBR7wwDZ6mgx.dW8dk7OVo.RA13eIMK2HZX3BDvLqZtXIEGClyu', 'faculty', 'Ms. Fortuno', '../assets/images/default-user.png'),
+('pandes@my.cspc.edu.ph', '20231004', '$2b$12$tJzBR7wwDZ6mgx.dW8dk7OVo.RA13eIMK2HZX3BDvLqZtXIEGClyu', 'faculty', 'Ms. Pandes', '../assets/images/tiffany-lyn.png'),
+('onesa@my.cspc.edu.ph', '20231005', '$2b$12$tJzBR7wwDZ6mgx.dW8dk7OVo.RA13eIMK2HZX3BDvLqZtXIEGClyu', 'faculty', 'Mrs. Onesa', '../assets/images/default-user.png'),
+('olleres@my.cspc.edu.ph', '20231006', '$2b$12$tJzBR7wwDZ6mgx.dW8dk7OVo.RA13eIMK2HZX3BDvLqZtXIEGClyu', 'faculty', 'Mr. Olleres', '../assets/images/default-user.png'),
+('buena@my.cspc.edu.ph', '20231007', '$2b$12$tJzBR7wwDZ6mgx.dW8dk7OVo.RA13eIMK2HZX3BDvLqZtXIEGClyu', 'faculty', 'Mr. Buena', '../assets/images/default-user.png'),
+('aurillas@my.cspc.edu.ph', '20231008', '$2b$12$tJzBR7wwDZ6mgx.dW8dk7OVo.RA13eIMK2HZX3BDvLqZtXIEGClyu', 'faculty', 'Mrs. Aurillas', '../assets/images/default-user.png'),
 
 -- Student Accounts
-('johndoe@my.cspc.edu.ph', '25123456', '$2b$12$9yGI7zOzRNxlmV5bX4i84eXujMFv86nOTWpw2H8IYuiIQjqmGWbQC', 'student', 'John Doe'),
-('janesmith@my.cspc.edu.ph', '25123457', '$2b$12$9yGI7zOzRNxlmV5bX4i84eXujMFv86nOTWpw2H8IYuiIQjqmGWbQC', 'student', 'Jane Smith');
+('blessie@my.cspc.edu.ph', '25123456', '$2b$12$9yGI7zOzRNxlmV5bX4i84eXujMFv86nOTWpw2H8IYuiIQjqmGWbQC', 'student', 'Blessie Bongalos', '../assets/images/default-user.png'),
+('ivy@my.cspc.edu.ph', '25123457', '$2b$12$9yGI7zOzRNxlmV5bX4i84eXujMFv86nOTWpw2H8IYuiIQjqmGWbQC', 'student', 'Ivy Doroin', '../assets/images/default-user.png'),
+('renna@my.cspc.edu.ph', '25123458', '$2b$12$9yGI7zOzRNxlmV5bX4i84eXujMFv86nOTWpw2H8IYuiIQjqmGWbQC', 'student', 'Renna Israel', '../assets/images/default-user.png'),
+('tischia@my.cspc.edu.ph', '25123459', '$2b$12$9yGI7zOzRNxlmV5bX4i84eXujMFv86nOTWpw2H8IYuiIQjqmGWbQC', 'student', 'Tischia Olivares', '../assets/images/tischia-olivares.png');
 
 -- Insert Sample Reservations with Realistic Schedules for Today and Tomorrow
 -- Today's date: 2025-12-06

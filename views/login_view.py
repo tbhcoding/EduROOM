@@ -128,9 +128,10 @@ def show_login(page):
             page.session.set("user_id", user['id'])
             page.session.set("user_role", user['role'])
             page.session.set("user_name", user['full_name'])
+            page.session.set("user_photo", user.get('photo'))  # Changed from "photo" to "user_photo"
             
-            # Login successful - navigate to dashboard
-            show_dashboard(page, user['id'], user['role'], user['full_name'])
+            # Login successful - navigate to dashboard (REMOVE the photo parameter)
+            show_dashboard(page, user['id'], user['role'], user['full_name'])  # Removed user.get('photo')
         else:
             # Reset button state
             login_button_ref.current.disabled = False

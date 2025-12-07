@@ -4,16 +4,30 @@ from data.models import NotificationModel
 def create_app_header(page, user_id, role, name, current_page="classrooms"):
     """Create the application header with navigation, notifications, and user drawer"""
     
+    # Get photo from session or use default
+    user_photo = page.session.get("user_photo") or "assets/images/default-user.png"
+    
     # ==================== DRAWER ====================
     def logout_click(e):
         from views.login_view import show_login
         page.close(drawer)
         page.session.clear()
         show_login(page)
-    
+
     def toggle_theme(e):
-        page.theme_mode = ft.ThemeMode.DARK if page.theme_mode == ft.ThemeMode.LIGHT else ft.ThemeMode.LIGHT
+        page.theme_mode = (
+            ft.ThemeMode.DARK 
+            if page.theme_mode == ft.ThemeMode.LIGHT 
+            else ft.ThemeMode.LIGHT
+        )
         page.update()
+    
+    # Create the switch once
+    theme_switch = ft.Switch(
+        label="Dark Mode",
+        value=page.theme_mode == ft.ThemeMode.DARK,
+        on_change=toggle_theme
+    )
     
     def open_profile(e):
         from views.profile_view import show_profile
@@ -25,7 +39,13 @@ def create_app_header(page, user_id, role, name, current_page="classrooms"):
         controls=[
             ft.Container(
                 content=ft.Row([
-                    ft.Icon(ft.Icons.PERSON, size=40),
+                    ft.Image(
+                        src=user_photo,
+                        width=40,
+                        height=40,
+                        fit=ft.ImageFit.COVER,
+                        border_radius=20  # circular
+                    ),
                     ft.Column([
                         ft.Text(name, size=16, weight=ft.FontWeight.BOLD),
                         ft.Text(role.upper(), size=12, color=ft.Colors.GREY_600)
@@ -40,9 +60,9 @@ def create_app_header(page, user_id, role, name, current_page="classrooms"):
                 on_click=open_profile
             ),
             ft.ListTile(
-                leading=ft.Icon(ft.Icons.PALETTE),
-                title=ft.Text("Toggle Theme"),
-                on_click=toggle_theme
+                leading=ft.Icon(ft.Icons.DARK_MODE),
+                title=ft.Text("Dark Mode"),
+                on_click=lambda e: toggle_theme(e)
             ),
             ft.ListTile(
                 leading=ft.Icon(ft.Icons.LOGOUT),
@@ -186,7 +206,7 @@ def create_app_header(page, user_id, role, name, current_page="classrooms"):
     notif_button = ft.PopupMenuButton(
         content=ft.Container(
             content=ft.Stack([
-                ft.Icon(ft.Icons.NOTIFICATIONS, size=24),
+                ft.Icon(ft.Icons.NOTIFICATIONS, size=24, color="#DEC56B"),
                 notif_badge
             ]),
             padding=ft.padding.only(top=5, right=5),  # Add padding so badge isn't cut off
@@ -230,8 +250,12 @@ def create_app_header(page, user_id, role, name, current_page="classrooms"):
     users_enabled = role == "admin"
 
     active_style = ft.ButtonStyle(
-        color=ft.Colors.BLUE,
-        bgcolor=ft.Colors.BLUE_100,
+        color="#F5C518",
+        text_style=ft.TextStyle(size=16, decoration=ft.TextDecoration.UNDERLINE),
+    )
+
+    inactive_style = ft.ButtonStyle(
+        color="#FFFFFF",
     )
 
     navbar_block = ft.Row(
@@ -239,25 +263,25 @@ def create_app_header(page, user_id, role, name, current_page="classrooms"):
             ft.TextButton(
                 "Classrooms", 
                 on_click=go_classrooms,
-                style=active_style if current_page == "classrooms" else None
+                style=active_style if current_page == "classrooms" else inactive_style,
             ),
             ft.TextButton(
                 "Reservations", 
                 on_click=go_reservations_nav, 
                 disabled=not reservations_enabled,
-                style=active_style if current_page == "reservations" else None
+                style=active_style if current_page == "reservations" else inactive_style
             ),
             ft.TextButton(
                 "Users", 
                 on_click=go_users, 
                 disabled=not users_enabled,
-                style=active_style if current_page == "users" else None
+                style=active_style if current_page == "users" else inactive_style
             ),
             ft.TextButton(
                 "Analytics", 
                 on_click=go_analytics, 
                 disabled=not analytics_enabled,
-                style=active_style if current_page == "analytics" else None
+                style=active_style if current_page == "analytics" else inactive_style
             )
         ],
         expand=True,
@@ -266,6 +290,7 @@ def create_app_header(page, user_id, role, name, current_page="classrooms"):
 
     settings_btn = ft.IconButton(
         icon=ft.Icons.SETTINGS, 
+        icon_color="#DEC56B",
         tooltip="Settings", 
         on_click=lambda e: page.open(drawer)
     )
@@ -279,12 +304,12 @@ def create_app_header(page, user_id, role, name, current_page="classrooms"):
     header_container = ft.Container(
         content=header_row,
         padding=ft.padding.symmetric(horizontal=20, vertical=15),
-        bgcolor=ft.Colors.GREY_200,
+        bgcolor="#1E3A8A",
         border=ft.border.only(bottom=ft.BorderSide(2, ft.Colors.OUTLINE_VARIANT))
     )
     
     # ==================== WELCOME BANNER ====================
-    role_color = "#ffd141"
+    role_color = "#ffffff"
     
     welcome_banner = ft.Container(
         content=ft.Row(
