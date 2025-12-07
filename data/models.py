@@ -2,6 +2,13 @@ from data.database import db
 from utils.auth import hash_password, verify_password
 from datetime import datetime
 
+# Import realtime client for WebSocket updates
+try:
+    from utils.websocket_client import realtime
+    REALTIME_ENABLED = True
+except ImportError:
+    REALTIME_ENABLED = False
+
 class UserModel:
     @staticmethod
     def authenticate(id_number, password):
@@ -603,6 +610,13 @@ class ReservationModel:
             from data.models import NotificationModel
             NotificationModel.notify_new_reservation(reservation_id, room['room_name'])
         
+            if REALTIME_ENABLED and realtime.connected:
+                realtime.send("new_reservation", {
+                    "reservation_id": reservation_id,
+                    "room_name": room['room_name'],
+                    "message": f"New reservation for {room['room_name']}"
+                })
+        
         return reservation_id
 
     @staticmethod
@@ -632,6 +646,14 @@ class ReservationModel:
                 reservation_id, 
                 reservation['room_name']
             )
+            
+            if REALTIME_ENABLED and realtime.connected:
+                realtime.send("reservation_approved", {
+                    "reservation_id": reservation_id,
+                    "user_id": reservation['user_id'],
+                    "room_name": reservation['room_name'],
+                    "message": f"Reservation for {reservation['room_name']} approved"
+                })              
         
         return True
 

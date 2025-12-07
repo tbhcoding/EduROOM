@@ -1,6 +1,14 @@
 import flet as ft
 from views.login_view import show_login
 
+# Connect to WebSocket server on app start
+try:
+    from utils.websocket_client import realtime
+    realtime.connect()
+    print("✅ WebSocket client connecting...")
+except Exception as e:
+    print(f"⚠️ WebSocket not available: {e}")
+
 def main(page: ft.Page):
     page.title = "Classroom Reservation System"
     try:
