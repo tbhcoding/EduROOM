@@ -118,6 +118,25 @@ def show_admin_panel(page, user_id, role, name):
             )
         )
     
+    def create_scrollable_tab_content(reservation_list, empty_message):
+        """Create scrollable content for a tab"""
+        if reservation_list:
+            return ft.Container(
+                content=ft.Column(
+                    [create_reservation_card(r, show_actions=(r["status"] == "pending")) for r in reservation_list],
+                    spacing=10,
+                    scroll=ft.ScrollMode.AUTO,
+                ),
+                padding=10,
+                expand=True,
+            )
+        else:
+            return ft.Container(
+                content=ft.Text(empty_message, color=COLORS.GREY if hasattr(COLORS, "GREY") else "grey"),
+                padding=20,
+                expand=True,
+            )
+    
     # Create tabs for different sections
     tabs = ft.Tabs(
         selected_index=0,
@@ -125,95 +144,30 @@ def show_admin_panel(page, user_id, role, name):
             ft.Tab(
                 text=f"Pending ({len(pending)})",
                 icon=ICONS.PENDING,
-                content=ft.Container(
-                    content=ft.Column([
-                        ft.Column(
-                            [create_reservation_card(r, show_actions=True) for r in pending] if pending 
-                            else [ft.Container(
-                                content=ft.Text("No pending reservations", color=COLORS.GREY if hasattr(COLORS, "GREY") else "grey"),
-                                padding=20
-                            )],
-                            spacing=10,
-                            scroll=ft.ScrollMode.AUTO
-                        )
-                    ]),
-                    padding=10
-                )
+                content=create_scrollable_tab_content(pending, "No pending reservations")
             ),
             ft.Tab(
                 text=f"Approved ({len(approved)})",
                 icon=ICONS.CHECK_CIRCLE,
-                content=ft.Container(
-                    content=ft.Column([
-                        ft.Column(
-                            [create_reservation_card(r, show_actions=False) for r in approved] if approved
-                            else [ft.Container(
-                                content=ft.Text("No approved reservations", color=COLORS.GREY if hasattr(COLORS, "GREY") else "grey"),
-                                padding=20
-                            )],
-                            spacing=10,
-                            scroll=ft.ScrollMode.AUTO
-                        )
-                    ]),
-                    padding=10
-                )
+                content=create_scrollable_tab_content(approved, "No approved reservations")
             ),
             ft.Tab(
                 text=f"Ongoing ({len(ongoing)})",
                 icon=ICONS.PLAY_CIRCLE,
-                content=ft.Container(
-                    content=ft.Column([
-                        ft.Column(
-                            [create_reservation_card(r, show_actions=False) for r in ongoing] if ongoing
-                            else [ft.Container(
-                                content=ft.Text("No ongoing reservations", color=COLORS.GREY if hasattr(COLORS, "GREY") else "grey"),
-                                padding=20
-                            )],
-                            spacing=10,
-                            scroll=ft.ScrollMode.AUTO
-                        )
-                    ]),
-                    padding=10
-                )
+                content=create_scrollable_tab_content(ongoing, "No ongoing reservations")
             ),
             ft.Tab(
                 text=f"Done ({len(done)})",
                 icon=ICONS.TASK_ALT,
-                content=ft.Container(
-                    content=ft.Column([
-                        ft.Column(
-                            [create_reservation_card(r, show_actions=False) for r in done] if done
-                            else [ft.Container(
-                                content=ft.Text("No completed reservations", color=COLORS.GREY if hasattr(COLORS, "GREY") else "grey"),
-                                padding=20
-                            )],
-                            spacing=10,
-                            scroll=ft.ScrollMode.AUTO
-                        )
-                    ]),
-                    padding=10
-                )
+                content=create_scrollable_tab_content(done, "No completed reservations")
             ),
             ft.Tab(
                 text=f"Rejected ({len(rejected)})",
                 icon=ICONS.CANCEL,
-                content=ft.Container(
-                    content=ft.Column([
-                        ft.Column(
-                            [create_reservation_card(r, show_actions=False) for r in rejected] if rejected
-                            else [ft.Container(
-                                content=ft.Text("No rejected reservations", color=COLORS.GREY if hasattr(COLORS, "GREY") else "grey"),
-                                padding=20
-                            )],
-                            spacing=10,
-                            scroll=ft.ScrollMode.AUTO
-                        )
-                    ]),
-                    padding=10
-                )
+                content=create_scrollable_tab_content(rejected, "No rejected reservations")
             ),
         ],
-        expand=1
+        expand=True
     )
     
     page.controls.clear()
@@ -234,9 +188,12 @@ def show_admin_panel(page, user_id, role, name):
             ft.Divider(),
             ft.Container(
                 content=tabs,
-                height=500,
+                expand=True,
                 width=850
             )
-        ], horizontal_alignment=ft.CrossAxisAlignment.CENTER)
+        ], 
+        horizontal_alignment=ft.CrossAxisAlignment.CENTER,
+        expand=True
+        )
     )
     page.update()
