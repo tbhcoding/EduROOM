@@ -32,13 +32,13 @@ def main(page: ft.Page):
     # # Start with login page
     # show_login(page)
 
-    # Skip login for now - go directly to dashboard
-    from views.dashboard_view import show_dashboard
-    show_dashboard(page, user_id=1, role="admin", name="Admin User")
-
-    # #Skip login for now - go directly to dashboard
+    # # Skip login for now - go directly to dashboard
     # from views.dashboard_view import show_dashboard
-    # show_dashboard(page, user_id=2, role="faculty", name="Prof. John Smith")
+    # show_dashboard(page, user_id=1, role="admin", name="Admin User")
+
+    #Skip login for now - go directly to dashboard
+    from views.dashboard_view import show_dashboard
+    show_dashboard(page, user_id=2, role="faculty", name="Mr. Ibo")
 
 if __name__ == "__main__":
     ft.app(target=main, assets_dir="assets")

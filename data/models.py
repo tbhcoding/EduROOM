@@ -363,7 +363,7 @@ class ReservationModel:
             SELECT COUNT(*) as count FROM reservations
             WHERE classroom_id = %s 
             AND reservation_date = %s
-            AND status IN ('approved', 'pending', 'ongoing')
+            AND status IN ('approved', 'ongoing')
             AND start_time < %s   -- Existing reservation starts before new ends
             AND end_time > %s     -- Existing reservation ends after new starts
         """
@@ -388,7 +388,7 @@ class ReservationModel:
             FROM reservations
             WHERE classroom_id = %s 
             AND reservation_date = %s
-            AND status IN ('approved', 'pending', 'ongoing')
+            AND status IN ('approved', 'ongoing')
             ORDER BY start_time
         """
         results = db.fetch_all(query, (classroom_id, reservation_date))

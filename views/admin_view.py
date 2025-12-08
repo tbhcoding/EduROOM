@@ -107,10 +107,8 @@ def show_admin_panel(page, user_id, role, name):
             content=ft.Column([
                 ft.Text(res["room_name"], size=16, weight=ft.FontWeight.BOLD),
                 ft.Text(f"Reserved by: {res['full_name']}", size=12, color=ft.Colors.GREY_700),
-                ft.Row([
-                    ft.Text(f"Duration: {start} - {end}", size=12, color=ft.Colors.GREY_700),
-                    ft.Text(f"Date: {res_date}", size=12, color=ft.Colors.GREY_700),
-                ], spacing=15),
+                ft.Text(f"Duration: {start} - {end}", size=12, color=ft.Colors.GREY_700),
+                ft.Text(f"Date: {res_date}", size=12, color=ft.Colors.GREY_700),
                 ft.Text(f"Purpose: {res['purpose']}", size=12, color=ft.Colors.GREY_700),
             ], spacing=2, tight=True),
             expand=True,

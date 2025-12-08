@@ -8,17 +8,13 @@ def show_classroom_schedule(page, classroom_id, room_name):
     # Fetch reservations for this classroom
     try:
         reservations = ClassroomModel.get_classroom_reservations(classroom_id)
+        
     except Exception as e:
         reservations = []
         import traceback
         traceback.print_exc()
     
-    # Status color mapping
-    status_colors = {
-        "approved": ft.Colors.GREEN,
-        "pending": ft.Colors.ORANGE,
-        "rejected": ft.Colors.RED
-    }
+    reservations = [r for r in reservations if r.get("status", "").lower() == "approved"]
     
     # Create content rows (simpler approach)
     content_list = []
@@ -32,7 +28,6 @@ def show_classroom_schedule(page, classroom_id, room_name):
                     ft.Text("Time", weight=ft.FontWeight.BOLD, size=14, expand=2),
                     ft.Text("Purpose", weight=ft.FontWeight.BOLD, size=14, expand=3),
                     ft.Text("Reserved By", weight=ft.FontWeight.BOLD, size=14, expand=2),
-                    ft.Text("Status", weight=ft.FontWeight.BOLD, size=14, expand=1),
                 ]),
                 bgcolor=ft.Colors.GREY_200,
                 padding=10,
@@ -77,22 +72,9 @@ def show_classroom_schedule(page, classroom_id, room_name):
             end_time_str = format_time(end_time)
             
             purpose = res.get("purpose", "N/A")
-            status = res.get("status", "unknown").lower()
             reserved_by = res.get("reserved_by", "Unknown")
-            
-            # Create status badge
-            status_badge = ft.Container(
-                content=ft.Text(
-                    status.upper(),
-                    size=10,
-                    weight=ft.FontWeight.BOLD,
-                    color=ft.Colors.WHITE
-                ),
-                bgcolor=status_colors.get(status, ft.Colors.GREY),
-                padding=ft.padding.symmetric(horizontal=8, vertical=4),
-                border_radius=5
-            )
-            
+            border_radius=5
+
             # Add reservation row
             content_list.append(
                 ft.Container(
@@ -101,7 +83,6 @@ def show_classroom_schedule(page, classroom_id, room_name):
                         ft.Text(f"{start_time_str} - {end_time_str}", size=12, expand=2),
                         ft.Text(purpose, size=12, expand=3),
                         ft.Text(reserved_by, size=12, expand=2),
-                        ft.Container(content=status_badge, expand=1),
                     ]),
                     padding=10,
                     border=ft.border.only(bottom=ft.BorderSide(1, ft.Colors.GREY_300))
@@ -144,10 +125,10 @@ def show_classroom_schedule(page, classroom_id, room_name):
         modal=True,
         title=ft.Row(
             [
-                ft.Icon(ft.Icons.CALENDAR_MONTH, color=ft.Colors.BLUE),
                 ft.Text(f"Schedule for {room_name}", size=20, weight=ft.FontWeight.BOLD)
             ],
-            spacing=10
+            spacing=10,
+            alignment=ft.MainAxisAlignment.CENTER
         ),
         content=ft.Container(
             content=schedule_content,
