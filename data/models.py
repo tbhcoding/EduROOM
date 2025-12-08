@@ -325,27 +325,11 @@ class ClassroomModel:
 
 class ReservationModel:
     @staticmethod
-    def create_reservation(classroom_id, user_id, reservation_date, start_time, end_time, purpose):
-        """Create a new reservation"""
-        db.connect()
-        query = """
-            INSERT INTO reservations 
-            (classroom_id, user_id, reservation_date, start_time, end_time, purpose)
-            VALUES (%s, %s, %s, %s, %s, %s)
-        """
-        reservation_id = db.execute_query(
-            query, 
-            (classroom_id, user_id, reservation_date, start_time, end_time, purpose)
-        )
-        db.disconnect()
-        return reservation_id
-    
-    @staticmethod
     def get_user_reservations(user_id):
         """Get all reservations for a user"""
         db.connect()
         query = """
-            SELECT r.*, c.room_name, c.building
+            SELECT r.*, c.room_name, c.building, c.image_url
             FROM reservations r
             JOIN classrooms c ON r.classroom_id = c.id
             WHERE r.user_id = %s
@@ -360,7 +344,7 @@ class ReservationModel:
         """Get all reservations (for admin)"""
         db.connect()
         query = """
-            SELECT r.*, c.room_name, c.building, u.full_name, u.email
+            SELECT r.*, c.room_name, c.building, c.image_url, u.full_name, u.email
             FROM reservations r
             JOIN classrooms c ON r.classroom_id = c.id
             JOIN users u ON r.user_id = u.id
@@ -369,24 +353,6 @@ class ReservationModel:
         reservations = db.fetch_all(query)
         db.disconnect()
         return reservations
-    
-    @staticmethod
-    def approve_reservation(reservation_id):
-        """Approve a reservation"""
-        db.connect()
-        query = "UPDATE reservations SET status = 'approved' WHERE id = %s"
-        db.execute_query(query, (reservation_id,))
-        db.disconnect()
-        return True
-    
-    @staticmethod
-    def reject_reservation(reservation_id):
-        """Reject a reservation"""
-        db.connect()
-        query = "UPDATE reservations SET status = 'rejected' WHERE id = %s"
-        db.execute_query(query, (reservation_id,))
-        db.disconnect()
-        return True
     
     @staticmethod
     def check_availability(classroom_id, reservation_date, start_time, end_time, exclude_reservation_id=None):
@@ -434,7 +400,7 @@ class ReservationModel:
         """Get a single reservation by ID"""
         db.connect()
         query = """
-            SELECT r.*, c.room_name, c.building
+            SELECT r.*, c.room_name, c.building, c.image_url
             FROM reservations r
             JOIN classrooms c ON r.classroom_id = c.id
             WHERE r.id = %s
@@ -619,41 +585,49 @@ class ReservationModel:
         
         return reservation_id
 
+
     @staticmethod
     def approve_reservation(reservation_id):
         """Approve a reservation and notify the faculty member"""
         db.connect()
         
         # Get reservation details before updating
-        query = """
-            SELECT r.user_id, c.room_name 
+        details_query = """
+            SELECT r.user_id, r.classroom_id, c.room_name, r.reservation_date, r.start_time, r.end_time
             FROM reservations r
             JOIN classrooms c ON r.classroom_id = c.id
             WHERE r.id = %s
         """
-        reservation = db.fetch_one(query, (reservation_id,))
+        reservation = db.fetch_one(details_query, (reservation_id,))
         
-        # Update status
-        update_query = "UPDATE reservations SET status = 'approved' WHERE id = %s"
-        db.execute_query(update_query, (reservation_id,))
+        # Update status to approved
+        query = "UPDATE reservations SET status = 'approved' WHERE id = %s"
+        db.execute_query(query, (reservation_id,))
+        
         db.disconnect()
         
-        # Notify faculty member
+        # Notify the faculty member about approval
         if reservation:
             from data.models import NotificationModel
-            NotificationModel.notify_reservation_approved(
-                reservation['user_id'], 
-                reservation_id, 
-                reservation['room_name']
+            
+            date_str = reservation['reservation_date'].strftime('%B %d, %Y') if hasattr(reservation['reservation_date'], 'strftime') else str(reservation['reservation_date'])
+            message = f"Your reservation for {reservation['room_name']} on {date_str} has been approved"
+            
+            # Create notification in database
+            NotificationModel.create_notification(
+                user_id=reservation['user_id'],
+                message=message,
+                reservation_id=reservation_id
             )
             
+            # Send real-time WebSocket notification
             if REALTIME_ENABLED and realtime.connected:
                 realtime.send("reservation_approved", {
                     "reservation_id": reservation_id,
                     "user_id": reservation['user_id'],
                     "room_name": reservation['room_name'],
-                    "message": f"Reservation for {reservation['room_name']} approved"
-                })              
+                    "message": message
+                })
         
         return True
 
@@ -663,29 +637,44 @@ class ReservationModel:
         db.connect()
         
         # Get reservation details before updating
-        query = """
-            SELECT r.user_id, c.room_name 
+        details_query = """
+            SELECT r.user_id, r.classroom_id, c.room_name, r.reservation_date, r.start_time, r.end_time
             FROM reservations r
             JOIN classrooms c ON r.classroom_id = c.id
             WHERE r.id = %s
         """
-        reservation = db.fetch_one(query, (reservation_id,))
+        reservation = db.fetch_one(details_query, (reservation_id,))
         
-        # Update status
-        update_query = "UPDATE reservations SET status = 'rejected' WHERE id = %s"
-        db.execute_query(update_query, (reservation_id,))
+        # Update status to rejected
+        query = "UPDATE reservations SET status = 'rejected' WHERE id = %s"
+        db.execute_query(query, (reservation_id,))
+        
         db.disconnect()
         
-        # Notify faculty member
+        # Notify the faculty member about rejection
         if reservation:
             from data.models import NotificationModel
-            NotificationModel.notify_reservation_rejected(
-                reservation['user_id'], 
-                reservation_id, 
-                reservation['room_name']
+            
+            date_str = reservation['reservation_date'].strftime('%B %d, %Y') if hasattr(reservation['reservation_date'], 'strftime') else str(reservation['reservation_date'])
+            message = f"Your reservation for {reservation['room_name']} on {date_str} has been rejected"
+            
+            # Create notification in database
+            NotificationModel.create_notification(
+                user_id=reservation['user_id'],
+                message=message,
+                reservation_id=reservation_id
             )
-        
+            
+            # Send real-time WebSocket notification
+            if REALTIME_ENABLED and realtime.connected:
+                realtime.send("reservation_rejected", {
+                    "reservation_id": reservation_id,
+                    "user_id": reservation['user_id'],
+                    "room_name": reservation['room_name'],
+                    "message": message
+                })
         return True
+
 class ActivityLogModel:
     @staticmethod
     def log_activity(user_id, action, details=None, ip_address=None):

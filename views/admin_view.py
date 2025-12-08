@@ -83,65 +83,83 @@ def show_admin_panel(page, user_id, role, name):
         config = status_config.get(res["status"], status_config["pending"])
         
         # Format date and time
-        res_date = res["reservation_date"].strftime('%Y-%m-%d') if hasattr(res["reservation_date"], 'strftime') else str(res["reservation_date"])
+        res_date = res["reservation_date"].strftime('%m/%d/%Y') if hasattr(res["reservation_date"], 'strftime') else str(res["reservation_date"])
         start = str(res["start_time"])
         end = str(res["end_time"])
         
-        card_content = [
-            ft.ListTile(
-                leading=ft.Icon(ICONS.MEETING_ROOM),
-                title=ft.Text(res["room_name"], weight=ft.FontWeight.BOLD),
-                subtitle=ft.Text(f"By: {res['full_name']} ({res['email']}) • {res_date} • {start}-{end}"),
-            ),
-            ft.Container(
-                content=ft.Column([
-                    ft.Text(f"Purpose: {res['purpose']}", size=12),
-                    ft.Container(height=5),
-                ]),
-                padding=ft.padding.only(left=15, right=15, bottom=5)
-            )
-        ]
+        # Create room image path
+        image_src = res.get("image_url") if res.get("image_url") else "../assets/images/classroom-default.png"
         
-        # Add action buttons only for pending reservations
+        # Left side - Room image
+        left_section = ft.Container(
+            content=ft.Image(
+                src=image_src,
+                width=160,
+                height=120,
+                fit=ft.ImageFit.COVER,
+                border_radius=ft.border_radius.all(8)
+            ),
+            padding=ft.padding.all(15)
+        )
+        
+        # Middle section - Room details
+        middle_section = ft.Container(
+            content=ft.Column([
+                ft.Text(res["room_name"], size=16, weight=ft.FontWeight.BOLD),
+                ft.Text(f"Reserved by: {res['full_name']}", size=12, color=ft.Colors.GREY_700),
+                ft.Row([
+                    ft.Text(f"Duration: {start} - {end}", size=12, color=ft.Colors.GREY_700),
+                    ft.Text(f"Date: {res_date}", size=12, color=ft.Colors.GREY_700),
+                ], spacing=15),
+                ft.Text(f"Purpose: {res['purpose']}", size=12, color=ft.Colors.GREY_700),
+            ], spacing=2, tight=True),
+            expand=True,
+            padding=ft.padding.only(left=15)
+        )
+        
+        # Right section - Action buttons
         if show_actions and res["status"] == "pending":
-            card_content.append(
-                ft.Container(
-                    content=ft.Row([
-                        ft.ElevatedButton(
-                            "Approve",
-                            icon=ICONS.CHECK,
-                            color="white",
-                            bgcolor=COLORS.GREEN if hasattr(COLORS, "GREEN") else "green",
-                            on_click=lambda e, rid=res["id"], rn=res["room_name"], req=res["full_name"]: handle_approve(rid, rn, req)
-                        ),
-                        ft.OutlinedButton(
-                            "Reject",
-                            icon=ICONS.CLOSE,
-                            on_click=lambda e, rid=res["id"], rn=res["room_name"], req=res["full_name"]: handle_reject(rid, rn, req)
-                        )
-                    ], spacing=10),
-                    padding=ft.padding.only(left=15, right=15, bottom=10)
-                )
+            right_section = ft.Container(
+                content=ft.Row([
+                    ft.ElevatedButton(
+                        "Approve",
+                        color="white", width=120,
+                        bgcolor="#10B981",
+                        style=ft.ButtonStyle(shape=ft.RoundedRectangleBorder(radius=16)),
+                        on_click=lambda e, rid=res["id"], rn=res["room_name"], req=res["full_name"]: handle_approve(rid, rn, req)
+                    ),
+                    ft.ElevatedButton(
+                        "Reject",
+                        color="white", width=120,
+                        bgcolor="#EF4444",
+                        style=ft.ButtonStyle(shape=ft.RoundedRectangleBorder(radius=16)),
+                        on_click=lambda e, rid=res["id"], rn=res["room_name"], req=res["full_name"]: handle_reject(rid, rn, req)
+                    )
+                ], spacing=40, tight=True),
+                padding=ft.padding.all(50)
             )
         else:
-            # Show status badge for approved/rejected
-            card_content.append(
-                ft.Container(
-                    content=ft.Row([
-                        ft.Icon(config["icon"], size=16, color=config["color"]),
-                        ft.Text(res["status"].upper(), size=12, weight=ft.FontWeight.BOLD, color=config["color"])
-                    ], spacing=5),
-                    padding=ft.padding.only(left=15, right=15, bottom=10)
-                )
+            right_section = ft.Container(
+                content=ft.Row([
+                    ft.Icon(config["icon"], size=20, color=config["color"]),
+                    ft.Text(res["status"].upper(), size=12, weight=ft.FontWeight.BOLD, color=config["color"])
+                ], spacing=5),
+                padding=ft.padding.only(right=100)
             )
         
         return ft.Card(
             content=ft.Container(
-                content=ft.Column(card_content, spacing=0),
-                padding=10
-            )
+                content=ft.Row([
+                    left_section,
+                    middle_section,
+                    right_section
+                ], alignment=ft.MainAxisAlignment.START, vertical_alignment=ft.CrossAxisAlignment.CENTER),
+                padding=15,
+                bgcolor=ft.Colors.WHITE
+            ),
+            elevation=2
         )
-    
+
     def create_scrollable_tab_content(reservation_list, empty_message):
         """Create scrollable content for a tab"""
         if reservation_list:
@@ -161,34 +179,28 @@ def show_admin_panel(page, user_id, role, name):
                 expand=True,
             )
     
-    # Create tabs for different sections
     tabs = ft.Tabs(
         selected_index=0,
         tabs=[
             ft.Tab(
                 text=f"Pending ({len(pending)})",
-                icon=ICONS.PENDING,
-                content=create_scrollable_tab_content(pending, "No pending reservations")
+                content=create_scrollable_tab_content(pending, "No pending reservations"),
             ),
             ft.Tab(
                 text=f"Approved ({len(approved)})",
-                icon=ICONS.CHECK_CIRCLE,
-                content=create_scrollable_tab_content(approved, "No approved reservations")
+                content=create_scrollable_tab_content(approved, "No approved reservations"),
             ),
             ft.Tab(
                 text=f"Ongoing ({len(ongoing)})",
-                icon=ICONS.PLAY_CIRCLE,
-                content=create_scrollable_tab_content(ongoing, "No ongoing reservations")
+                content=create_scrollable_tab_content(ongoing, "No ongoing reservations"),
             ),
             ft.Tab(
                 text=f"Done ({len(done)})",
-                icon=ICONS.TASK_ALT,
-                content=create_scrollable_tab_content(done, "No completed reservations")
+                content=create_scrollable_tab_content(done, "No completed reservations"),
             ),
             ft.Tab(
                 text=f"Rejected ({len(rejected)})",
-                icon=ICONS.CANCEL,
-                content=create_scrollable_tab_content(rejected, "No rejected reservations")
+                content=create_scrollable_tab_content(rejected, "No rejected reservations"),
             ),
         ],
         expand=True
@@ -196,28 +208,21 @@ def show_admin_panel(page, user_id, role, name):
     
     page.controls.clear()
     page.add(
-        ft.Column([
-            header, 
-            ft.Container(
-                content=ft.Row([
-                    ft.Row([
-                        ft.IconButton(icon=ICONS.ARROW_BACK, on_click=back_to_dashboard, tooltip="Back"),
-                        ft.Text("Admin Panel - Manage Reservations", size=24, weight=ft.FontWeight.BOLD),
-                    ]),
-                    ft.IconButton(icon=ICONS.REFRESH, on_click=lambda e: refresh_panel(), tooltip="Refresh"),
-                ], alignment=ft.MainAxisAlignment.SPACE_BETWEEN),
-                padding=20,
-                width=850
-            ),
-            ft.Divider(),
-            ft.Container(
-                content=tabs,
-                expand=True,
-                width=850
-            )
-        ], 
-        horizontal_alignment=ft.CrossAxisAlignment.CENTER,
-        expand=True
+        ft.Column(
+            [
+                header,
+                ft.Container(
+                    ft.Text("Manage Reservations", size=32, color="#4D4848",
+                            font_family="Montserrat Bold", weight=ft.FontWeight.BOLD),
+                            padding=5, width=850, alignment=ft.alignment.center
+                ),
+                ft.Container(
+                    ft.Row([tabs], alignment=ft.MainAxisAlignment.CENTER),
+                    width=1000,
+                    expand=True,
+                ),
+            ],
+            horizontal_alignment=ft.CrossAxisAlignment.CENTER, expand=True
         )
     )
     page.update()
