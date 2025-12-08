@@ -1,9 +1,17 @@
 import flet as ft
 from data.models import ClassroomModel
 from datetime import datetime
+from utils.security import ensure_authenticated, touch_session, get_csrf_token
 
 def show_classroom_schedule(page, classroom_id, room_name):
     """Display reservation schedule for a specific classroom"""
+    
+    # Session guard
+    if not ensure_authenticated(page):
+        return
+
+    # Optional CSRF for approve/reject/cancel actions if you add them here
+    # csrf_token = get_csrf_token(page)
  
     # Fetch reservations for this classroom
     try:

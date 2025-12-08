@@ -4,9 +4,17 @@ from data.models import ClassroomModel, ReservationModel, ActivityLogModel
 from datetime import datetime
 from components.app_header import create_app_header
 from components.datetime_picker import DateTimePicker
+from utils.security import ensure_authenticated, touch_session, get_csrf_token
 
 def show_reservation_form(page, user_id, role, name, classroom_id):
     """Display the reservation form for faculty to book classrooms"""
+    
+    # Session guard
+    if not ensure_authenticated(page):
+        return
+
+    # Optional CSRF for approve/reject/cancel actions if you add them here
+    # csrf_token = get_csrf_token(page)
     
     # Create the header and drawer
     header, drawer = create_app_header(page, user_id, role, name, current_page="reservations")

@@ -1,6 +1,6 @@
 from data.database import db
 from utils.auth import hash_password, verify_password
-from datetime import datetime
+from datetime import datetime, timedelta
 
 # Import realtime client for WebSocket updates
 try:
@@ -24,15 +24,73 @@ class UserModel:
     
     @staticmethod
     def authenticate_with_email(email, id_number, password):
-        """Authenticate user by email, ID number, and password"""
+        """
+        Authenticate user by email, ID number, and password,
+        with basic lockout/throttling.
+
+        Returns: (user_dict or None, error_message or None)
+        """
+        LOCK_THRESHOLD = 5               # max failed attempts
+        LOCK_WINDOW_MINUTES = 1         # in this recent window
+
         db.connect()
-        query = "SELECT * FROM users WHERE email = %s AND id_number = %s AND is_active = TRUE"
+        query = """
+            SELECT *
+            FROM users
+            WHERE email = %s
+              AND id_number = %s
+              AND is_active = TRUE
+        """
         user = db.fetch_one(query, (email, id_number))
-        db.disconnect()
-        
-        if user and verify_password(password, user['password_hash']):
-            return user
-        return None
+
+        # If no such active user, just return None (generic invalid credentials)
+        if not user:
+            db.disconnect()
+            return None, None
+
+        # --- LOCKOUT CHECK ---
+        failed_attempts = user.get("failed_attempts", 0) or 0
+        last_failed_at = user.get("last_failed_at")
+
+        now = datetime.now()
+        lock_window_start = now - timedelta(minutes=LOCK_WINDOW_MINUTES)
+
+        # If last_failed_at is outside the window, reset attempts
+        if last_failed_at and last_failed_at < lock_window_start and failed_attempts > 0:
+            reset_query = "UPDATE users SET failed_attempts = 0, last_failed_at = NULL WHERE id = %s"
+            db.execute_query(reset_query, (user["id"],))
+            user["failed_attempts"] = 0
+            failed_attempts = 0
+            last_failed_at = None
+
+        # If still too many recent failures, block login
+        if failed_attempts >= LOCK_THRESHOLD and last_failed_at and last_failed_at >= lock_window_start:
+            db.disconnect()
+            return None, "Account temporarily locked. Please try again later."
+
+        # --- PASSWORD CHECK ---
+        if verify_password(password, user["password_hash"]):
+            # Success → reset failed attempts
+            reset_query = """
+                UPDATE users
+                SET failed_attempts = 0,
+                    last_failed_at = NULL
+                WHERE id = %s
+            """
+            db.execute_query(reset_query, (user["id"],))
+            db.disconnect()
+            return user, None
+        else:
+            # Failure → increment failed attempts and set last_failed_at = NOW()
+            update_query = """
+                UPDATE users
+                SET failed_attempts = failed_attempts + 1,
+                    last_failed_at = NOW()
+                WHERE id = %s
+            """
+            db.execute_query(update_query, (user["id"],))
+            db.disconnect()
+            return None, None
     
     @staticmethod
     def create_user(email, id_number, password, role, full_name):

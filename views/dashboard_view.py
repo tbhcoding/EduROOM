@@ -4,9 +4,17 @@ from utils.config import ICONS, COLORS
 from data.models import ClassroomModel, ReservationModel
 from views.schedule_view import show_classroom_schedule
 from components.app_header import create_app_header
+from utils.security import ensure_authenticated, touch_session, get_csrf_token
 
 def show_dashboard(page, user_id, role, name):
     """Display main dashboard with availability filtering"""
+    
+    # Session guard (auth + inactivity timeout)
+    if not ensure_authenticated(page):
+        return
+
+    # Optional: get CSRF token if you ever need it here
+    # csrf_token = get_csrf_token(page)
 
     # Auto-update reservation statuses (approved → ongoing → done)
     try:

@@ -8,10 +8,14 @@ import flet as ft
 from utils.config import ICONS, COLORS
 from data.analytics import AnalyticsModel
 from components.app_header import create_app_header
-
+from utils.security import ensure_authenticated, get_csrf_token, touch_session
 
 def show_analytics_dashboard(page, user_id, role, name):
     """Display analytics dashboard with charts and insights"""
+    
+    # Session guard
+    if not ensure_authenticated(page):
+        return
     
     # Only admin can access analytics
     if role != "admin":
@@ -20,6 +24,9 @@ def show_analytics_dashboard(page, user_id, role, name):
     # Create the header and drawer
     header, drawer = create_app_header(page, user_id, role, name, current_page="analytics")
 
+    # Optional
+    # csrf_token = get_csrf_token(page)
+    
     def back_to_dashboard(e):
         from views.dashboard_view import show_dashboard
         show_dashboard(page, user_id, role, name)

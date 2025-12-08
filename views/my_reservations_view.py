@@ -10,8 +10,17 @@ try:
 except ImportError:
     REALTIME_ENABLED = False
 
+from utils.security import ensure_authenticated, touch_session, get_csrf_token
+
 def show_my_reservations(page, user_id, role, name):
     """Display faculty member's reservations from database"""
+    
+    # Session guard
+    if not ensure_authenticated(page):
+        return
+
+    # Optional CSRF token if needed for cancel/delete actions later
+    # csrf_token = get_csrf_token(page)
     
     # Create the header and drawer
     header, drawer = create_app_header(page, user_id, role, name, current_page="reservations")

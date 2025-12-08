@@ -2,6 +2,8 @@ import flet as ft
 from utils.config import ICONS, COLORS
 from data.models import ReservationModel, ActivityLogModel
 from components.app_header import create_app_header
+from utils.security import ensure_authenticated, get_csrf_token, touch_session
+
 
 try:
     from utils.websocket_client import realtime
@@ -9,15 +11,27 @@ try:
 except ImportError:
     REALTIME_ENABLED = False
 
+from utils.security import ensure_authenticated, get_csrf_token, touch_session
 
 def show_admin_panel(page, user_id, role, name):
     """Display admin panel for managing reservations from database"""
 
+    # Session guard
+    if not ensure_authenticated(page):
+        return
+
+    # Keep your existing admin-only check
+    if role != "admin":
+        return
+    
     # Create the header and drawer
     header, drawer = create_app_header(page, user_id, role, name, current_page="reservations")
   
     if role != "admin":
         return
+    
+    # Optional CSRF token if you will use it in handlers later
+    # csrf_token = get_csrf_token(page)
     
     if REALTIME_ENABLED:
         def on_new_reservation(data):

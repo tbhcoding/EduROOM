@@ -3,6 +3,7 @@ import os
 import shutil
 import uuid
 from data.models import UserModel, ActivityLogModel
+from utils.security import ensure_authenticated, touch_session, get_csrf_token
 
 # ==================== CONFIGURATION ====================
 # Allowed file extensions for profile pictures
@@ -45,6 +46,10 @@ def validate_image_file(file_path):
 
 def show_profile(page, user_id, role, name):
     """Display user profile with edit capabilities and profile picture upload"""
+    
+    # Session guard
+    if not ensure_authenticated(page):
+        return
     
     # Get user data from database
     try:

@@ -76,6 +76,8 @@ CREATE TABLE users (
     photo VARCHAR(255),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     is_active BOOLEAN DEFAULT TRUE,
+    failed_attempts INT NOT NULL DEFAULT 0,
+    last_failed_at DATETIME NULL,
     INDEX idx_email (email),
     INDEX idx_id_number (id_number),
     INDEX idx_role (role)
