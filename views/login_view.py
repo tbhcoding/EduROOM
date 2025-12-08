@@ -117,9 +117,28 @@ def show_login(page):
         
         page.update()
         
-        # Authenticate using database
-        user = UserModel.authenticate_with_email(email, id_number, password)
-        
+        # Authenticate using database (with lockout support)
+        user, error_message = UserModel.authenticate_with_email(email, id_number, password)
+
+        # If account is temporarily locked
+        if error_message:
+            # Reset button state
+            login_button_ref.current.disabled = False
+            login_button_ref.current.content.controls[1].value = "Login"
+            login_button_ref.current.content.controls[0].visible = False
+
+            show_error(error_message)
+
+            # OPTIONAL: log lockout event
+            # ActivityLogModel.log_activity(
+            #     None,
+            #     "Account lockout",
+            #     f"Email: {email}, ID: {id_number}"
+            # )
+
+            page.update()
+            return
+
         if user:
             # Log the login activity
             ActivityLogModel.log_activity(user['id'], "User logged in")
@@ -128,16 +147,25 @@ def show_login(page):
             page.session.set("user_id", user['id'])
             page.session.set("user_role", user['role'])
             page.session.set("user_name", user['full_name'])
-            page.session.set("user_photo", user.get('photo'))  # Changed from "photo" to "user_photo"
+            page.session.set("user_photo", user.get('photo'))
             
-            # Login successful - navigate to dashboard (REMOVE the photo parameter)
-            show_dashboard(page, user['id'], user['role'], user['full_name'])  # Removed user.get('photo')
+            # Login successful - navigate to dashboard
+            show_dashboard(page, user['id'], user['role'], user['full_name'])
         else:
             # Reset button state
             login_button_ref.current.disabled = False
             login_button_ref.current.content.controls[1].value = "Login"
             login_button_ref.current.content.controls[0].visible = False
+
+            # OPTIONAL: log failed attempt
+            # ActivityLogModel.log_activity(
+            #     None,
+            #     "Failed login",
+            #     f"Email: {email}, ID: {id_number}"
+            # )
+
             show_error("Invalid credentials. Please check your email, ID, and password.")
+
 
     # Logo section - responsive sizing
     logo = ft.Container(
