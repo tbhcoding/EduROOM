@@ -18,7 +18,7 @@ def main(page: ft.Page):
         pass
 
     page.vertical_alignment = ft.MainAxisAlignment.CENTER
-    page.horizontal_alignment = ft.CrossAxisAlignment.CENTER
+    page.horizontal_alignmewbent = ft.CrossAxisAlignment.CENTER
 
     page.fonts = {
     "Roboto": "assets/fonts/Roboto-Regular.ttf",
