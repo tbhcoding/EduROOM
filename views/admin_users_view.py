@@ -1,31 +1,16 @@
-"""
-Admin User Management View
-==========================
-Allows administrators to create, list, edit, disable, and delete users.
-Implements RBAC enforcement and activity logging for all admin actions.
-"""
-
 import flet as ft
 from data.models import UserModel, ActivityLogModel
 from components.app_header import create_app_header
-from utils.security import ensure_authenticated, get_csrf_token, touch_session, validate_csrf_token
 
 
 def show_admin_users(page, user_id, role, name):
     """Display admin user management panel"""
-    
-    # Session guard
-    if not ensure_authenticated(page):
-        return
     
     # Only admin can access this view
     if role != "admin":
         from views.dashboard_view import show_dashboard
         show_dashboard(page, user_id, role, name)
         return
-    
-    # Get per-session CSRF token (for destructive actions)
-    csrf_token = get_csrf_token(page)
     
     # Create the header and drawer
     header, drawer = create_app_header(page, user_id, role, name, current_page="users")
@@ -36,9 +21,8 @@ def show_admin_users(page, user_id, role, name):
     
     # References for dynamic updates
     user_list_ref = ft.Ref[ft.Column]()
-    stats_row_ref = ft.Ref[ft.Row]()
-    filter_dropdown_ref = ft.Ref[ft.Dropdown]()
     search_field_ref = ft.Ref[ft.TextField]()
+    filter_buttons_ref = ft.Ref[ft.Row]()
     
     def show_snackbar(message, is_error=False):
         """Show a snackbar notification"""
@@ -81,23 +65,6 @@ def show_admin_users(page, user_id, role, name):
             bgcolor=ft.Colors.WHITE,
         )
     
-    # Get user statistics
-    stats = UserModel.get_user_stats()
-    
-    stats_row = ft.Row(
-        ref=stats_row_ref,
-        controls=[
-            create_stat_card("Total Users", stats['total_users'], ft.Icons.PEOPLE, ft.Colors.BLUE),
-            create_stat_card("Admins", stats['admin_count'], ft.Icons.ADMIN_PANEL_SETTINGS, ft.Colors.PURPLE),
-            create_stat_card("Faculty", stats['faculty_count'], ft.Icons.SCHOOL, ft.Colors.ORANGE),
-            create_stat_card("Students", stats['student_count'], ft.Icons.PERSON, ft.Colors.TEAL),
-            create_stat_card("Active", stats['active_count'], ft.Icons.CHECK_CIRCLE, ft.Colors.GREEN),
-            create_stat_card("Inactive", stats['inactive_count'], ft.Icons.BLOCK, ft.Colors.RED),
-        ],
-        spacing=10,
-        wrap=True,
-        alignment=ft.MainAxisAlignment.CENTER,
-    )
     
     # ==================== CREATE USER MODAL ====================
     new_email = ft.TextField(label="Email", hint_text="user@cspc.edu.ph", width=350)
@@ -208,7 +175,7 @@ def show_admin_users(page, user_id, role, name):
                 "Create User",
                 icon=ft.Icons.PERSON_ADD,
                 on_click=handle_create_user,
-                bgcolor=ft.Colors.BLUE,
+                bgcolor="#3B82F6",
                 color=ft.Colors.WHITE,
             ),
         ],
@@ -295,9 +262,8 @@ def show_admin_users(page, user_id, role, name):
             ft.TextButton("Cancel", on_click=close_edit_modal),
             ft.ElevatedButton(
                 "Save Changes",
-                icon=ft.Icons.SAVE,
                 on_click=handle_edit_user,
-                bgcolor=ft.Colors.BLUE,
+                bgcolor="#3B82F6",
                 color=ft.Colors.WHITE,
             ),
         ],
@@ -377,7 +343,6 @@ def show_admin_users(page, user_id, role, name):
             ft.TextButton("Cancel", on_click=close_reset_modal),
             ft.ElevatedButton(
                 "Reset Password",
-                icon=ft.Icons.LOCK_RESET,
                 on_click=handle_reset_password,
                 bgcolor=ft.Colors.ORANGE,
                 color=ft.Colors.WHITE,
@@ -452,7 +417,6 @@ def show_admin_users(page, user_id, role, name):
             ft.TextButton("Cancel", on_click=close_delete_modal),
             ft.ElevatedButton(
                 "Delete User",
-                icon=ft.Icons.DELETE_FOREVER,
                 on_click=handle_delete_user,
                 bgcolor=ft.Colors.RED,
                 color=ft.Colors.WHITE,
@@ -493,13 +457,13 @@ def show_admin_users(page, user_id, role, name):
     def create_user_card(user):
         """Create a user card with actions"""
         role_colors = {
-            'admin': ft.Colors.PURPLE,
-            'faculty': ft.Colors.ORANGE,
-            'student': ft.Colors.TEAL,
+            'admin': "#FAB295",
+            'faculty': "#FFE0B2",
+            'student': "#BCDDF5",
         }
         role_color = role_colors.get(user['role'], ft.Colors.GREY)
         
-        status_color = ft.Colors.GREEN if user['is_active'] else ft.Colors.RED
+        status_color = "#AED7A5" if user['is_active'] else "#D7A5A5"
         status_text = "Active" if user['is_active'] else "Inactive"
         
         # Format created date
@@ -508,45 +472,69 @@ def show_admin_users(page, user_id, role, name):
         # Prevent actions on self
         is_self = user['id'] == user_id
         
+        # Get user photo or use default
+        user_photo = user.get('photo') or "assets/images/default-user.png"
+        
         return ft.Card(
             content=ft.Container(
                 content=ft.Row([
-                    # User info
-                    ft.Row([
-                        ft.CircleAvatar(
-                            content=ft.Text(user['full_name'][0].upper(), size=20),
-                            bgcolor=role_color,
-                            color=ft.Colors.WHITE,
-                            radius=25,
+                    # Profile picture
+                    ft.Container(
+                        content=ft.Image(
+                            src=user_photo,
+                            width=60,
+                            height=60,
+                            fit=ft.ImageFit.COVER,
+                            border_radius=ft.border_radius.all(30),
                         ),
-                        ft.Column([
-                            ft.Row([
-                                ft.Text(user['full_name'], weight=ft.FontWeight.BOLD, size=15),
-                                ft.Container(
-                                    content=ft.Text(user['role'].upper(), size=10, color=ft.Colors.WHITE),
-                                    bgcolor=role_color,
-                                    padding=ft.padding.symmetric(horizontal=8, vertical=2),
-                                    border_radius=10,
-                                ),
-                                ft.Container(
-                                    content=ft.Text(status_text, size=10, color=ft.Colors.WHITE),
-                                    bgcolor=status_color,
-                                    padding=ft.padding.symmetric(horizontal=8, vertical=2),
-                                    border_radius=10,
-                                ),
-                                ft.Text("(You)" if is_self else "", size=12, italic=True, color=ft.Colors.GREY),
-                            ], spacing=8),
-                            ft.Text(f"{user['email']} • ID: {user['id_number']}", size=12, color=ft.Colors.GREY_600),
-                            ft.Text(f"Created: {created}", size=11, color=ft.Colors.GREY_500),
+                        width=60,
+                        height=60,
+                        border_radius=ft.border_radius.all(30),
+                        clip_behavior=ft.ClipBehavior.ANTI_ALIAS,
+                    ),
+                    
+                    # User info column
+                    ft.Container(
+                        content=ft.Column([
+                            ft.Text(user['full_name'], weight=ft.FontWeight.BOLD, size=15),
+                            ft.Text(f"CSPC Email: {user['email']}", size=12, color=ft.Colors.GREY_700),
+                            ft.Text(f"ID: {user['id_number']}", size=12, color=ft.Colors.GREY_700),
                         ], spacing=3),
-                    ], spacing=15, expand=True),
+                        width=200,
+                    ),
+                    
+                    # Role column
+                    ft.Container(
+                        content=ft.Container(
+                            content=ft.Text(user['role'].upper(), size=11),
+                            bgcolor=role_color,
+                            padding=ft.padding.symmetric(horizontal=10, vertical=4),
+                            border_radius=8,
+                            alignment=ft.alignment.center,
+                        ),
+                        width=100,
+                        alignment=ft.alignment.center,
+                    ),
+                    
+                    # Status column
+                    ft.Container(
+                        content=ft.Container(
+                            content=ft.Text(status_text, size=11),
+                            bgcolor=status_color,
+                            padding=ft.padding.symmetric(horizontal=10, vertical=4),
+                            border_radius=8,
+                            alignment=ft.alignment.center,
+                        ),
+                        width=100,
+                        alignment=ft.alignment.center,
+                    ),
                     
                     # Action buttons
                     ft.Row([
                         ft.IconButton(
                             icon=ft.Icons.EDIT,
                             tooltip="Edit User",
-                            icon_color=ft.Colors.BLUE,
+                            icon_color="#3B82F6",
                             on_click=lambda e, u=user: open_edit_modal(u),
                         ),
                         ft.IconButton(
@@ -560,20 +548,19 @@ def show_admin_users(page, user_id, role, name):
                             tooltip="Deactivate" if user['is_active'] else "Activate",
                             icon_color=ft.Colors.RED if user['is_active'] else ft.Colors.GREEN,
                             on_click=lambda e, u=user: handle_toggle_status(u),
-                            disabled=is_self,
                         ),
                         ft.IconButton(
                             icon=ft.Icons.DELETE,
                             tooltip="Delete User",
                             icon_color=ft.Colors.RED,
                             on_click=lambda e, u=user: open_delete_modal(u),
-                            disabled=is_self,
                         ),
                     ], spacing=0),
-                ], alignment=ft.MainAxisAlignment.SPACE_BETWEEN),
+                ], alignment=ft.MainAxisAlignment.START, spacing=30),
                 padding=15,
             ),
             elevation=2,
+            width=800,
         )
     
     # ==================== FILTER & SEARCH ====================
@@ -600,6 +587,54 @@ def show_admin_users(page, user_id, role, name):
                      query_lower in u['id_number'].lower()]
         
         return users
+    
+    def get_user_counts():
+        """Get counts for each filter category"""
+        all_users = UserModel.get_all_users()
+        counts = {
+            'all': len(all_users),
+            'active': len([u for u in all_users if u['is_active']]),
+            'inactive': len([u for u in all_users if not u['is_active']]),
+            'admin': len([u for u in all_users if u['role'] == 'admin']),
+            'faculty': len([u for u in all_users if u['role'] == 'faculty']),
+            'student': len([u for u in all_users if u['role'] == 'student']),
+        }
+        return counts
+    
+    def create_filter_button(label, filter_value, count):
+        """Create a filter button with count"""
+        is_selected = current_filter == filter_value
+        return ft.TextButton(
+            text=f"{label} ({count})",
+            on_click=lambda e: on_filter_click(filter_value),
+            style=ft.ButtonStyle(
+                color=ft.Colors.WHITE if is_selected else ft.Colors.GREY_700,
+                bgcolor="#3B82F6" if is_selected else ft.Colors.GREY_200,
+                padding=ft.padding.symmetric(horizontal=15, vertical=10),
+                shape=ft.RoundedRectangleBorder(radius=8),
+            ),
+        )
+    
+    def on_filter_click(filter_value):
+        """Handle filter button click"""
+        nonlocal current_filter
+        current_filter = filter_value
+        update_filter_buttons()
+        update_user_list()
+    
+    def update_filter_buttons():
+        """Update filter buttons appearance"""
+        counts = get_user_counts()
+        filter_buttons_ref.current.controls = [
+            ft.Text("Filter by:", size=14, color=ft.Colors.GREY_700, weight=ft.FontWeight.BOLD),
+            create_filter_button("All Users", "all", counts['all']),
+            create_filter_button("Active", "active", counts['active']),
+            create_filter_button("Inactive", "inactive", counts['inactive']),
+            create_filter_button("Admin", "admin", counts['admin']),
+            create_filter_button("Faculty", "faculty", counts['faculty']),
+            create_filter_button("Student", "student", counts['student']),
+        ]
+        page.update()
     
     def on_filter_change(e):
         nonlocal current_filter
@@ -649,63 +684,68 @@ def show_admin_users(page, user_id, role, name):
                 content=ft.Column([
                     # Title row
                     ft.Row([
-                        ft.Row([
-                            ft.IconButton(icon=ft.Icons.ARROW_BACK, on_click=back_to_dashboard, tooltip="Back"),
-                            ft.Text("User Management", size=24, weight=ft.FontWeight.BOLD),
-                        ]),
-                        ft.Row([
-                            ft.OutlinedButton(
-                                "Reservations",
-                                icon=ft.Icons.CALENDAR_MONTH,
-                                on_click=go_to_reservations,
-                            ),
-                            ft.ElevatedButton(
-                                "Create User",
-                                icon=ft.Icons.PERSON_ADD,
-                                on_click=open_create_modal,
-                                bgcolor=ft.Colors.BLUE,
-                                color=ft.Colors.WHITE,
-                            ),
-                            ft.IconButton(icon=ft.Icons.REFRESH, on_click=lambda e: refresh_panel(), tooltip="Refresh"),
-                        ], spacing=10),
-                    ], alignment=ft.MainAxisAlignment.SPACE_BETWEEN),
-                    
-                    ft.Divider(),
-                    
-                    # Stats row
-                    stats_row,
-                    
-                    ft.Container(height=10),
-                    
-                    # Filter and search row
-                    ft.Row([
-                        ft.Dropdown(
-                            ref=filter_dropdown_ref,
-                            label="Filter by",
-                            width=180,
-                            value="all",
-                            options=[
-                                ft.dropdown.Option("all", "All Users"),
-                                ft.dropdown.Option("admin", "Admins"),
-                                ft.dropdown.Option("faculty", "Faculty"),
-                                ft.dropdown.Option("student", "Students"),
-                                ft.dropdown.Option("active", "Active"),
-                                ft.dropdown.Option("inactive", "Inactive"),
-                            ],
-                            on_change=on_filter_change,
+                        ft.Container(
+                            ft.Text("User Management", size=32, color="#4D4848",
+                                    font_family="Montserrat Bold", weight=ft.FontWeight.BOLD),
+                                    alignment=ft.alignment.center
                         ),
+                    ], alignment=ft.MainAxisAlignment.CENTER),
+                    
+                    # Search and create button row (centered)
+                    ft.Row([
                         ft.TextField(
                             ref=search_field_ref,
-                            label="Search",
-                            hint_text="Search by name, email, or ID...",
+                            hint_text="Search by Name, Email, or ID Number",
                             prefix_icon=ft.Icons.SEARCH,
-                            width=350,
                             on_change=on_search_change,
+                            border_color="#C3C3C3",
+                            fill_color="#C3C3C3", 
+                            focused_border_color="#C3C3C3",
+                            focused_bgcolor="#C3C3C3",
+                            bgcolor="#C3C3C3",
+                            width=600,
                         ),
-                        ft.Text(f"Total: {len(users)} user(s)", color=ft.Colors.GREY_600),
-                    ], spacing=20, alignment=ft.MainAxisAlignment.START),
+                        ft.ElevatedButton(
+                            text="Create New User",
+                            icon=ft.Icons.ADD,
+                            on_click=open_create_modal,
+                            height=45,
+                            bgcolor="#8F98AA",
+                            color=ft.Colors.WHITE,
+                            width=150,
+                            style=ft.ButtonStyle(
+                                shape=ft.RoundedRectangleBorder(radius=3),
+                            ),
+                        ),
+                    ], spacing=15, alignment=ft.MainAxisAlignment.CENTER),
                     
                     ft.Container(height=10),
+                    
+                    # Filter buttons row
+                    ft.Container(
+                        content=ft.Row(
+                            ref=filter_buttons_ref,
+                            controls=[
+                                ft.Text("Filter by:", size=14, color=ft.Colors.GREY_700, weight=ft.FontWeight.BOLD),
+                                create_filter_button("All Users", "all", len(users)),
+                                create_filter_button("Active", "active", len([u for u in UserModel.get_all_users() if u['is_active']])),
+                                create_filter_button("Inactive", "inactive", len([u for u in UserModel.get_all_users() if not u['is_active']])),
+                                create_filter_button("Admin", "admin", len([u for u in UserModel.get_all_users() if u['role'] == 'admin'])),
+                                create_filter_button("Faculty", "faculty", len([u for u in UserModel.get_all_users() if u['role'] == 'faculty'])),
+                                create_filter_button("Student", "student", len([u for u in UserModel.get_all_users() if u['role'] == 'student'])),
+                            ],
+                            spacing=20,
+                            wrap=True,
+                        ),
+                        alignment=ft.alignment.center,
+                    ),
+                    
+                    ft.Container(height=5),
+                    
+                    # Total users count
+                    ft.Text(f"Total: {len(users)} user(s)", color=ft.Colors.GREY_600, size=14),
+                    
+                    ft.Container(height=5),
                     
                     # User list
                     ft.Container(
@@ -714,8 +754,10 @@ def show_admin_users(page, user_id, role, name):
                             controls=user_cards,
                             spacing=10,
                             scroll=ft.ScrollMode.AUTO,
+                            horizontal_alignment=ft.CrossAxisAlignment.CENTER,
                         ),
                         expand=True,
+                        alignment=ft.alignment.top_center,
                     ),
                 ], spacing=10),
                 padding=20,
