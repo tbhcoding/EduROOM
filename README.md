@@ -110,12 +110,13 @@ The system automatically logs critical events:
 ---
 
 ## 8. Analytics Dashboard
-Admins can view graphical insights:
-
-- Peak classroom usage hours  
-- Most frequently used rooms  
-- Approval vs rejection metrics  
-- Reservation volume over time  
+Admins can view comprehensive data visualizations and insights:
+- Status metrics (total, approved, pending, rejected)
+- Weekly trends with percentage comparisons
+- Peak usage hours and daily averages
+- Most popular classrooms and active faculty
+- Room utilization rates and recommendations
+- Real-time updates via WebSocket
 
 ---
 
