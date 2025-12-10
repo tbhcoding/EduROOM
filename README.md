@@ -40,15 +40,31 @@ Developed using **Python + Flet**, **MySQL**, and **WebSockets**.
 # Key Features (Aligned with SRS)
 
 ## 1. User Authentication & Security
-- Secure login using CSPC email + ID  
-- Password hashing using **bcrypt**  
-- **Login lockout** after 5 failed attempts (10 min window)  
-- **Session management & inactivity timeout**  
-  - Auto-logout after idle period  
-  - Session expiration notice  
-  - Activity tracking via `last_activity`  
-- **CSRF-style per-session action token**  
-- Clean session clearing upon logout  
+
+- Secure login using **CSPC email + ID + password**
+- Password hashing using **bcrypt** (no plain-text passwords)
+- **Account status checks** (only active users can log in)
+- **Login lockout** after 5 failed attempts within 10 minutes
+- **Session management & inactivity timeout**
+  - Auto-logout after idle period
+  - Session expiration notice on the login screen
+  - Activity tracking via `last_activity`
+- **CSRF-style per-session action token** for sensitive/destructive actions
+- **Role-Based Access Control (RBAC)** enforced both in:
+  - UI (admin options hidden for non-admins)
+  - View/controller layer (admin-only views validate `role == "admin"`)
+- **Secure logout**
+  - Full `page.session` clearing
+  - Redirect back to login
+- **Security-aware configuration**
+  - Secrets and DB credentials stored in `.env`, not hard-coded
+- **Defensive coding in data layer**
+  - Parameterized queries to reduce SQL injection risk
+- **Authentication & admin activity logging**
+  - Login success/failure
+  - Lockouts
+  - User creation, updates, role changes, activation/deactivation
+
 
 ---
 
