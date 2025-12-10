@@ -268,7 +268,7 @@ def show_dashboard(page, user_id, role, name):
         """Handle date picker selection"""
         nonlocal selected_date
         selected_date = e.control.value
-        date_button_ref.current.content.value = selected_date.strftime('%m/%d/%Y')
+        date_button_ref.current.content.controls[0].value = selected_date.strftime('%m/%d/%Y')
         check_filter_ready()
         page.update()
     
@@ -276,7 +276,7 @@ def show_dashboard(page, user_id, role, name):
         """Handle start time picker selection"""
         nonlocal selected_start_time
         selected_start_time = e.control.value
-        start_time_button_ref.current.content.value = selected_start_time
+        start_time_button_ref.current.content.controls[0].value = selected_start_time
         check_filter_ready()
         page.update()
     
@@ -284,7 +284,7 @@ def show_dashboard(page, user_id, role, name):
         """Handle end time picker selection"""
         nonlocal selected_end_time
         selected_end_time = e.control.value
-        end_time_button_ref.current.content.value = selected_end_time
+        end_time_button_ref.current.content.controls[0].value = selected_end_time
         check_filter_ready()
         page.update()
     

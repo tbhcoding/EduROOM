@@ -329,10 +329,7 @@ def show_my_reservations(page, user_id, role, name):
     
     def create_reservation_card(res):
         """Create a reservation card following admin panel format"""
-        # Debug: Print the reservation data to see what's being returned
-        print(f"Reservation data: {res}")
-        print(f"Image URL: {res.get('image_url')}")
-        
+
         status_config = {
             "pending": {"color": "orange", "icon": ICONS.HOURGLASS_EMPTY, "can_edit": True, "can_cancel": True},
             "approved": {"color": COLORS.GREEN if hasattr(COLORS, "GREEN") else "green", "icon": ICONS.CHECK_CIRCLE, "can_edit": False, "can_cancel": True},
