@@ -13,7 +13,7 @@
 - **UI/UX Designer & Lead Frontend Engineer:** Tischia Ann Olivares  
 - **Documentation Managers:** Ivy Doroin, Renna Israel  
 
----
+-
 
 **BSCS 3A — Camarines Sur Polytechnic Colleges**
 
