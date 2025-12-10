@@ -6,13 +6,17 @@
 - **CS 319** – Information Assurance and Security  
 - **CS 3110** – Software Engineering 1  
 
-## Developed by: TechValks  
-- Full-Stack Developer & Lead Backend Engineer: Blessie Faith Bongalos
-- UI/UX Designer & Lead Frontend Engineer: Tischia Ann Olivares  
-- Documentation Managers: Ivy Doroin, Renna Israel 
-**BSCS 3A — Camarines Sur Polytechnic Colleges**
+## Developed by: **TechValks**
+
+### **Team Roles**
+- **Full-Stack Developer & Lead Backend Engineer:** Blessie Faith Bongalos  
+- **UI/UX Designer & Lead Frontend Engineer:** Tischia Ann Olivares  
+- **Documentation Managers:** Ivy Doroin, Renna Israel  
 
 ---
+
+**BSCS 3A — Camarines Sur Polytechnic Colleges**
+
 
 # Project Overview
 
