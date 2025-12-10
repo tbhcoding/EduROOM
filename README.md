@@ -435,3 +435,277 @@ Faculty receive **instant notifications** when their reservations are:
 These updates appear automatically without needing to refresh the page.
 
 ![Real-Time Notification](app_screenshots/faculty-notification.png)
+
+---
+
+## 4. Administrator User Guide
+
+Admins have full control over all reservation requests submitted by faculty members.  
+The **Manage Reservations** interface organizes requests into five tabs for streamlined review.
+
+### **Reservation Tabs Overview**
+
+| Tab | Description |
+|------|-------------|
+| **Pending** | New requests waiting for admin action |
+| **Approved** | Confirmed reservations |
+| **Ongoing** | Reservations currently in progress |
+| **Done** | Completed reservations |
+| **Rejected** | Requests denied by admin |
+
+---
+
+### **Viewing Reservation Details**
+
+1. Choose a tab (e.g., **Pending**)  
+2. On the reservations card, you will see the following information:  
+   - Room  
+   - Faculty requester  
+   - Date and time  
+   - Purpose  
+
+
+![View Reservation Details](app_screenshots/admin-reservation-details-pending.png)
+
+  #### **Approving or Rejecting a Reservation**
+  
+  Upon approval or rejection:
+
+  - The reservation moves automatically to its respective tab  
+  - Faculty notifications appear instantly  
+  - The dashboard analytics update without refreshing the page  
+  - The faculty member receives **real-time notification** via WebSockets
+
+![View Reservation Details](app_screenshots/admin-reservation-details-approved.png)
+
+![View Reservation Details](app_screenshots/admin-reservation-details-rejected.png)
+
+
+---
+
+### **Tracking Ongoing and Completed Reservations**
+
+Admins can monitor rooms currently in use:
+
+- **Ongoing** tab → Shows active reservations for the current day and time
+- **Done** tab → Shows all past reservations for record-tracking. 
+
+![View Reservation Details](app_screenshots/admin-reservation-details-ongoing.png)
+
+![View Reservation Details](app_screenshots/admin-reservation-details-done.png)
+
+---
+
+## 4.1 User Management (Admin)
+
+The **User Management** module allows admins to create, modify, activate/deactivate, and delete user accounts.
+
+![User Management Page](app_screenshots/user-management-page.png)
+
+### **User Management Features**
+
+| Feature | Description |
+|---------|-------------|
+| **Search Users** | Search by name, email, or ID number |
+| **Filter Users** | Filter by Active, Inactive, Admin, Faculty, Student |
+| **Create User** | Add new users with assigned roles |
+| **Edit User** | Update email, role, ID number, profile picture |
+| **Activate/Deactivate** | Temporarily disable users without deleting them |
+| **Reset Password** | Instantly assign a new password for account recovery |
+| **Delete Account** | Permanently remove a user |
+
+---
+
+### **Creating a New User**
+
+1. Click **+ Create New User**  
+2. Fill in user details:  
+   - Full Name  
+   - Email  
+   - ID Number  
+   - Role (Admin, Faculty, Student)  
+   - Initial Password  
+3. Click **Create User** to save
+
+![Create New User](app_screenshots/create-user-form.png)
+
+
+---
+
+## 4.2 Admin Analytics Dashboard
+
+The **EduROOM Analytics Dashboard** provides administrators with real-time insights into reservation activity, classroom usage, and user behavior.  
+Only **Admin** accounts have access to this module.
+
+To access the analytics, click **Analytics** from the navigation bar.
+
+
+
+### Real-Time Analytics Updates
+
+EduROOM integrates WebSocket technology to deliver **live data updates**.  
+Whenever a reservation is created, approved, rejected, or completed:
+
+✔ The analytics panel refreshes automatically  
+✔ No page reload is required  
+✔ Admin dashboards always show the latest numbers  
+
+This ensures real-time accuracy for tracking classroom usage.
+
+---
+## 4.2.1 Status Metrics
+
+These cards show the current total count of each reservation status:
+
+- **Total Reservations**
+- **Approved**
+- **Pending**
+- **Rejected**
+
+Each card updates automatically when:
+- A faculty submits a reservation  
+- An admin approves or rejects a request  
+- A reservation becomes ongoing or done  
+
+---
+
+## 4.2.2 Weekly Reservation Trends
+
+This section compares booking activity between:
+
+- **This Week**
+- **Last Week**
+
+
+The bar chart and counts show:
+- Weekly volume changes  
+- Growth percentage  
+- Reservation streaks  
+- Sudden increases/decreases in usage  
+
+This helps admins detect patterns and plan room availability.
+
+---
+
+## 4.2.3 Peak Hour, Daily Average, and Popular Room
+
+EduROOM provides automated insights such as:
+
+- **Peak Hour** – the time slot with the highest booking activity  
+- **Daily Average** – average reservations per day over 30 days  
+- **Most Popular Room** – the most requested classroom  
+
+This helps admins:
+- Identify periods of high system usage  
+- Optimize classroom schedules  
+- Allocate support resources strategically  
+
+---
+## 4.2.4 Status Distribution Table
+
+This table breaks down how many reservations fall under each status category:
+
+| Status | Count | Percentage |
+|--------|--------|--------------|
+
+Statuses include:
+- **Approved**
+- **Rejected**
+- **Ongoing**
+- **Done**
+
+The percentage chart updates **in real time**.
+---
+![Insights Overview](app_screenshots/analytics-1-4.png)
+---
+
+
+## 4.2.5 Most Popular Classrooms
+
+A ranking table showing rooms with the highest usage.
+
+Includes:
+- Room name  
+- Building  
+- Number of reservations  
+- Popularity bar indicator  
+
+Used for:
+- Identifying rooms in high demand  
+- Detecting underutilized spaces  
+- Making recommendations for classroom improvements  
+
+---
+![Insights Overview](app_screenshots/analytics-2-5.png)
+---
+
+## 4.2.6 Faculty Activity Tracker
+
+This section shows which faculty members make the most reservations.
+
+Metrics provided:
+- Total reservations made by each faculty  
+- Activity level comparisons  
+- Identification of power users  
+
+---
+
+## 4.2.7 Recent Trends (Last 10 Days)
+
+A daily breakdown of reservation counts and charted activity volume.
+
+
+This helps admins quickly spot:
+- Sudden surges in reservations  
+- Quiet days  
+- Seasonal patterns (e.g., exam week, events)  
+
+---
+
+## 4.2.8 Classroom Utilization Table
+
+This section lists each classroom and its usage statistics:
+
+- Room name  
+- Building  
+- Total reservations  
+- Approved reservations  
+
+Useful for:
+- Identifying underused classrooms  
+- Planning maintenance and scheduling  
+- Decision-making for future facility improvements  
+
+---
+![Insights Overview](app_screenshots/analytics-6-8.png)
+---
+
+## ✔ Summary: Why Admin Analytics Matters
+
+The Analytics module empowers CSPC administrators to:
+
+| Benefit | Explanation |
+|---------|-------------|
+| **Real-time monitoring** | Live updates via WebSockets |
+| **Better decision-making** | Trends, peak hours, popular rooms |
+| **Resource optimization** | Utilization rates guide scheduling |
+| **User behavior insights** | Faculty activity and request patterns |
+| **Operational transparency** | Clear breakdown of reservation statuses |
+
+---
+
+## ✔ Summary: Admin Tools Overview
+
+Admins can perform:
+
+- Full reservation workflow oversight  
+- User lifecycle management  
+- Real-time response monitoring  
+- System usage analytics  
+- Account and profile updates  
+
+Making EduROOM a complete facility management tool tailored for CSPC.
+
+---
+
+
