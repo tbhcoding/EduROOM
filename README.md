@@ -318,4 +318,119 @@ EduROOM’s WebSocket system ensures **true real-time responsiveness**, meeting 
 
 ---
 
-**© EduROOM Project 2025**
+# User Manual
+This section guides CSPC **Students**, **Faculty**, and **Admins** on how to use the EduROOM Classroom Reservation System.
+
+## 1. Login & User Accounts
+
+### How to Log In
+1. Open the EduROOM application.
+2. Enter your **CSPC email** and **ID number**.
+3. Enter your password and click **Login**.
+
+![EduROOM Login Page](app_screenshots/login-page.png)
+
+## 2. Student User Guide
+
+Students have view-only access. They cannot create reservations.
+Their main purpose is to check real-time classroom availability.
+
+### 2.1 Accessing the Classrooms Page
+
+Once logged in, the system automatically opens the Classrooms page.
+This page displays all rooms in Academic Building IV, including their availability status.
+
+![Available Classrooms](app_screenshots/available-rooms.png)
+
+### 2.2 View Room Schedule
+
+To see confirmed reservations for a specific classroom, click on the **View Schedule** button of a classroom.
+
+![Classroom Schedule](app_screenshots/room-schedule.png)
+
+### 2.3 Searching for Classrooms
+
+Students can quickly find a room using the built-in search bar. Go to the Search field at the top of the Classrooms page and type keywords related to the room.
+
+![Search Classrooms](app_screenshots/search-rooms.png)
+
+### 2.4 Filtering Rooms
+
+Students can filter classroom results using the **Select Date**, **Start Time**, and **End Time** filters.
+
+![Filter Classrooms](app_screenshots/filter-rooms.png)
+
+## 2.5 Settings & Account Management
+
+### Accessing Settings
+1. Click on the settings icon in the top-right corner to open the settings drawer, which displays options for **Profile**, **Dark Mode** , and **Logout**.
+
+![Settings Drawer](app_screenshots/settings-drawer.png)
+
+### View Your Profile
+Select **Profile** to view your account details (Name, Email, ID, Role). You can also change your profile picture by clicking **Upload New Picture**.
+
+![Student Profile](app_screenshots/account-profile.png)
+
+### Change Your Password
+From your profile page, click **Change Password**, then enter your current password, new password, and confirm the new password before clicking **Update Password**.
+
+![Change Password](app_screenshots/change-password.png)
+
+
+## 3. Faculty User Guide
+
+Faculty members have access to all student features, plus the ability to **create classroom reservations** and **manage their reservations**.
+
+### 3.1 Viewing Classrooms
+
+Faculty can access the same classroom viewing features as students. But unlike students, faculty members have an **enabled "Reserve" button** for each classroom, allowing them to submit reservation requests.
+
+![Faculty Classrooms View](app_screenshots/faculty-available-rooms.png)
+
+### 3.2 Creating a Reservation
+
+#### Step 1: Navigate to the Classrooms Page
+From your dashboard, you will see all available classrooms.
+
+#### Step 2: Select a Classroom
+Click on the classroom you want to reserve.
+
+#### Step 3: Fill Out the Reservation Form
+Provide the following information: Date, Start Time, End Time, and Purpose of reservation.
+
+![Create Reservation Form](app_screenshots/create-reservation-form.png)
+
+When you select a date, the system automatically displays all **reserved time slots** for that day. You cannot select time periods that are already booked.
+
+#### Step 4: Submit Your Request
+Click the **Submit Reservation** button.
+
+#### Step 5: Wait for Admin Approval
+Your reservation will be marked as **Pending** until an admin reviews and approves it.
+
+## 3.3 Managing My Reservations
+Faculty can view and track all their reservation requests.
+
+### Accessing Your Reservations
+1. Click on **My Reservations** from the navigation menu.
+2. You will see a list of all your reservation requests organized into two tabs:
+   - **Upcoming**: Future reservations you can still manage
+   - **Past**: Historical reservation records
+
+![My Reservations Page](app_screenshots/my-reservations.png)
+
+### Managing Upcoming Reservations
+You can edit or cancel reservations that are still pending or upcoming. Past reservations cannot be modified
+
+![Edit or Cancel Reservation](app_screenshots/edit-cancel-reservation.png)
+
+### 3.4 Real-Time Notifications
+
+Faculty receive **instant notifications** when their reservations are:
+- Approved by an admin
+- Rejected by an admin
+
+These updates appear automatically without needing to refresh the page.
+
+![Real-Time Notification](app_screenshots/faculty-notification.png)
