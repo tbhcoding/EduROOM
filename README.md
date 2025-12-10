@@ -16,20 +16,17 @@
 - **Product Lead / Vision & Feature Prioritization:** Blessie Faith Bongalos  
 
 #### Design & User Experience
-- **UI/UX Designer & Lead Frontend Engineer:** Tischia Ann Olivares  
-- **UI/UX & Accessibility Designer:** Tischia Ann Olivares  
+- **UI/UX & Accesibility Designer & Lead Frontend Engineer:** Tischia Ann Olivares   
 
 #### Development & Engineering
-- **Full-Stack Developer & Lead Backend Engineer:** Blessie Faith Bongalos  
-- **Lead Developer (Flet Architecture):** Blessie Faith Bongalos  
+- **Lead Full-Stack Developer (Flet Architecture) & Lead Backend Engineer:** Blessie Faith Bongalos   
 - **Data & Integration Engineer (Storage + Emerging Tech):** Blessie Faith Bongalos, Tischia Ann Olivares
 
 #### Quality Assurance
-- **QA / Test Coordinator:** Tischia Ann Olivares  
+- **QA / Test Coordinator:** Tischia Ann Olivares, Blessie Faith Bongalos 
 
 #### Documentation & Release
-- **Documentation Managers:** Renna Israel, Ivy Doroin  
-- **Documentation & Release Manager:** Renna Israel, Ivy Doroin  
+- **Documentation & Release Managers:** Renna Israel, Ivy Doroin  
 ---
 
 **BSCS 3A — Camarines Sur Polytechnic Colleges**
