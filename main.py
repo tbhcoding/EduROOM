@@ -1,4 +1,5 @@
 import flet as ft
+import os
 from views.login_view import show_login
 
 # Connect to WebSocket server on app start
@@ -41,4 +42,9 @@ def main(page: ft.Page):
 #     show_dashboard(page, user_id=2, role="faculty", name="Mr. Ibo")
 
 if __name__ == "__main__":
-    ft.app(target=main, assets_dir="assets")
+    ft.app(
+    target=main,
+    assets_dir="assets",
+    view=ft.AppView.WEB_BROWSER,
+    port=int(os.getenv("PORT", 8080))
+)
