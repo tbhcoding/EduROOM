@@ -22,5 +22,5 @@ Thumbs.db
 build/
 dist/
 
-.envca.pem 
-.env 
+ca.pem 
+.env

@@ -41,8 +41,7 @@ def main(page: ft.Page):
 #     from views.dashboard_view import show_dashboard
 #     show_dashboard(page, user_id=2, role="faculty", name="Mr. Ibo")
 
-if __name__ == "__main__":
-    ft.app(
+ft.app(
     target=main,
     assets_dir="assets",
     view=ft.AppView.WEB_BROWSER,
