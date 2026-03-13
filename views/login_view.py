@@ -3,7 +3,7 @@ from utils.config import ICONS, COLORS
 from data.models import UserModel, ActivityLogModel
 from views.dashboard_view import show_dashboard
 from utils.security import touch_session, get_csrf_token
-
+from data.models import UserModel, ActivityLogModel, SessionLogModel
 
 def show_login(page):
     """Display the enhanced login page with database authentication"""
@@ -111,11 +111,11 @@ def show_login(page):
 
     def login_click(e):
         hide_error()
-        
+
         email = email_field.value.strip()
         id_number = id_number_field.value.strip()
         password = password_field.value
-        
+
         # Validate all fields are filled
         if not email or not id_number or not password:
             show_error("Please fill in all fields")
@@ -126,9 +126,9 @@ def show_login(page):
         if not is_active:
             show_error(message)
             return
-        
+
         page.update()
-        
+
         # Authenticate using database (with lockout support)
         user, error_message = UserModel.authenticate_with_email(email, id_number, password)
 
@@ -140,51 +140,46 @@ def show_login(page):
             login_button_ref.current.content.controls[0].visible = False
 
             show_error(error_message)
-
-            # OPTIONAL: log lockout event
-            # ActivityLogModel.log_activity(
-            #     None,
-            #     "Account lockout",
-            #     f"Email: {email}, ID: {id_number}"
-            # )
-
             page.update()
             return
 
         if user:
-            # Log the login activity
             ActivityLogModel.log_activity(user['id'], "User logged in")
 
-            # (Optional but nice) clear any stale session data
+            # Clear stale page session data first
             page.session.clear()
-            
+
+            # Create DB-backed login session
+            db_session_id = SessionLogModel.start_session(user["id"])
+
             # Store user info in page session
             page.session.set("user_id", user['id'])
             page.session.set("user_role", user['role'])
             page.session.set("user_name", user['full_name'])
             page.session.set("user_photo", user.get('photo'))
+            page.session.set("db_session_id", db_session_id)
 
-            # NEW: initialize session activity + CSRF token
-            touch_session(page)       # sets last_activity
-            get_csrf_token(page)      # generates & stores action_token
+            # Existing app-side session tracking
+            touch_session(page)
+            get_csrf_token(page)
 
-            # Login successful - navigate to dashboard
+            # Reset button state before redirect
+            login_button_ref.current.disabled = False
+            login_button_ref.current.content.controls[1].value = "Login"
+            login_button_ref.current.content.controls[0].visible = False
+
+            page.update()
             show_dashboard(page, user['id'], user['role'], user['full_name'])
+
         else:
             # Reset button state
             login_button_ref.current.disabled = False
             login_button_ref.current.content.controls[1].value = "Login"
             login_button_ref.current.content.controls[0].visible = False
 
-            # OPTIONAL: log failed attempt
-            # ActivityLogModel.log_activity(
-            #     None,
-            #     "Failed login",
-            #     f"Email: {email}, ID: {id_number}"
-            # )
-
-            show_error("Invalid credentials. Please check your email, ID, and password.")
-
+            show_error("Invalid email, ID number, or password.")
+            page.update()
+        
     # Logo section - responsive sizing
     logo = ft.Container(
         content=ft.Column([

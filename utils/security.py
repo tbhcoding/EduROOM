@@ -17,6 +17,15 @@ def touch_session(page):
     """
     page.session.set("last_activity", _now().isoformat())
 
+    # Sync with DB-backed session log
+    try:
+        from data.models import SessionLogModel
+        db_session_id = page.session.get("db_session_id")
+        if db_session_id:
+            SessionLogModel.touch_session(db_session_id)
+    except Exception:
+        pass
+
 
 def is_session_expired(page):
     """
@@ -47,6 +56,7 @@ def ensure_authenticated(page):
         -> refresh last_activity and return True.
     """
     from views.login_view import show_login  # local import to avoid circular refs
+    from data.models import SessionLogModel, ActivityLogModel  # local import for safety
 
     user_id = page.session.get("user_id")
 
@@ -58,7 +68,18 @@ def ensure_authenticated(page):
 
     # Case 2: Session exists but is expired
     if is_session_expired(page):
-        # Clear old session but immediately set a notice for the login screen
+        expired_user_id = page.session.get("user_id")
+        db_session_id = page.session.get("db_session_id")
+
+        # Close DB session record
+        if db_session_id:
+            SessionLogModel.end_session(db_session_id)
+        elif expired_user_id:
+            SessionLogModel.end_user_active_sessions(expired_user_id)
+
+        if expired_user_id:
+            ActivityLogModel.log_activity(expired_user_id, "Session expired")
+
         page.session.clear()
         page.session.set(
             "login_notice",

@@ -393,6 +393,173 @@ class ClassroomModel:
         db.disconnect()
         return reservations
 
+
+class SessionLogModel:
+    @staticmethod
+    def start_session(user_id):
+        """
+        Start a new session for the user.
+        Optional rule: close any still-open previous sessions first.
+        Returns the new session ID.
+        """
+        db.connect()
+
+        # Close stale active sessions for this user
+        close_old_query = """
+            UPDATE user_sessions
+            SET logout_time = NOW(),
+                last_activity = NOW(),
+                status = 'Offline'
+            WHERE user_id = %s
+              AND status = 'Online'
+              AND logout_time IS NULL
+        """
+        db.execute_query(close_old_query, (user_id,))
+
+        insert_query = """
+            INSERT INTO user_sessions (user_id, login_time, last_activity, status)
+            VALUES (%s, NOW(), NOW(), 'Online')
+        """
+        session_id = db.execute_query(insert_query, (user_id,))
+        db.disconnect()
+        return session_id
+
+    @staticmethod
+    def end_session(session_id):
+        """End a session by session ID."""
+        if not session_id:
+            return False
+
+        db.connect()
+        query = """
+            UPDATE user_sessions
+            SET logout_time = NOW(),
+                last_activity = NOW(),
+                status = 'Offline'
+            WHERE id = %s
+              AND status = 'Online'
+        """
+        result = db.execute_query(query, (session_id,))
+        db.disconnect()
+        return result is not None
+
+    @staticmethod
+    def end_user_active_sessions(user_id):
+        """Fallback: end all active sessions for a user."""
+        db.connect()
+        query = """
+            UPDATE user_sessions
+            SET logout_time = NOW(),
+                last_activity = NOW(),
+                status = 'Offline'
+            WHERE user_id = %s
+              AND status = 'Online'
+              AND logout_time IS NULL
+        """
+        result = db.execute_query(query, (user_id,))
+        db.disconnect()
+        return result is not None
+
+    @staticmethod
+    def touch_session(session_id):
+        """Refresh session activity without changing login_time."""
+        if not session_id:
+            return False
+
+        db.connect()
+        query = """
+            UPDATE user_sessions
+            SET last_activity = NOW()
+            WHERE id = %s
+              AND status = 'Online'
+        """
+        result = db.execute_query(query, (session_id,))
+        db.disconnect()
+        return result is not None
+
+    @staticmethod
+    def mark_stale_sessions_offline(timeout_minutes=5):
+        """
+        Mark sessions offline if no activity for X minutes.
+        Useful if app closed without logout.
+        """
+        db.connect()
+        query = f"""
+            UPDATE user_sessions
+            SET logout_time = COALESCE(logout_time, NOW()),
+                status = 'Offline'
+            WHERE status = 'Online'
+              AND last_activity < (NOW() - INTERVAL {int(timeout_minutes)} MINUTE)
+        """
+        result = db.execute_query(query)
+        db.disconnect()
+        return result is not None
+
+    @staticmethod
+    def get_online_sessions():
+        """Get currently online users."""
+        db.connect()
+        query = """
+            SELECT
+                us.id AS session_id,
+                us.user_id,
+                u.full_name,
+                u.role,
+                us.login_time,
+                us.logout_time,
+                us.last_activity,
+                us.status
+            FROM user_sessions us
+            JOIN users u ON us.user_id = u.id
+            WHERE us.status = 'Online'
+              AND us.logout_time IS NULL
+            ORDER BY us.login_time DESC
+        """
+        rows = db.fetch_all(query)
+        db.disconnect()
+        return rows if rows else []
+
+    @staticmethod
+    def get_session_history(limit=50):
+        """Get recent session history."""
+        db.connect()
+        query = """
+            SELECT
+                us.id AS session_id,
+                us.user_id,
+                u.full_name,
+                u.role,
+                us.login_time,
+                us.logout_time,
+                us.last_activity,
+                us.status
+            FROM user_sessions us
+            JOIN users u ON us.user_id = u.id
+            ORDER BY us.login_time DESC
+            LIMIT %s
+        """
+        rows = db.fetch_all(query, (limit,))
+        db.disconnect()
+        return rows if rows else []
+
+    @staticmethod
+    def get_session_stats():
+        """Get summary stats for the admin dashboard."""
+        db.connect()
+        query = """
+            SELECT
+                SUM(CASE WHEN status = 'Online' AND logout_time IS NULL THEN 1 ELSE 0 END) AS online_now,
+                COUNT(*) AS total_sessions,
+                SUM(CASE WHEN DATE(login_time) = CURDATE() THEN 1 ELSE 0 END) AS logins_today
+            FROM user_sessions
+        """
+        row = db.fetch_one(query)
+        db.disconnect()
+        return row if row else {
+            "online_now": 0,
+            "total_sessions": 0,
+            "logins_today": 0,
+        }
 class ReservationModel:
     @staticmethod
     def create_reservation(classroom_id, user_id, reservation_date, start_time, end_time, purpose):

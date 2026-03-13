@@ -53,6 +53,7 @@ USE classroom_reservation_db;
 -- =====================================================
 SET FOREIGN_KEY_CHECKS = 0;
 
+DROP TABLE IF EXISTS user_sessions;
 DROP TABLE IF EXISTS notifications;
 DROP TABLE IF EXISTS activity_logs;
 DROP TABLE IF EXISTS reservations;
@@ -275,3 +276,23 @@ FROM reservations r
 JOIN classrooms c ON r.classroom_id = c.id
 WHERE r.reservation_date = '2025-12-09'
 ORDER BY c.room_name, r.start_time;
+
+-- =================== FOR USER SESSIONS =====================
+
+CREATE TABLE IF NOT EXISTS user_sessions (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
+    login_time DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    logout_time DATETIME NULL,
+    last_activity DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    status ENUM('Online', 'Offline') NOT NULL DEFAULT 'Online',
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    CONSTRAINT fk_user_sessions_user
+        FOREIGN KEY (user_id) REFERENCES users(id)
+        ON DELETE CASCADE
+);
+
+CREATE INDEX idx_user_sessions_user_id ON user_sessions(user_id);
+CREATE INDEX idx_user_sessions_status ON user_sessions(status);
+CREATE INDEX idx_user_sessions_login_time ON user_sessions(login_time);

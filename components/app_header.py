@@ -1,5 +1,6 @@
 import flet as ft
 from data.models import NotificationModel
+from data.models import NotificationModel, SessionLogModel, ActivityLogModel
 
 def create_app_header(page, user_id, role, name, current_page="classrooms"):
     """Create the application header with navigation, notifications, and user drawer"""
@@ -10,6 +11,20 @@ def create_app_header(page, user_id, role, name, current_page="classrooms"):
     # ==================== DRAWER ====================
     def logout_click(e):
         from views.login_view import show_login
+
+        current_user_id = page.session.get("user_id")
+        db_session_id = page.session.get("db_session_id")
+
+        # Close DB session
+        if db_session_id:
+            SessionLogModel.end_session(db_session_id)
+        elif current_user_id:
+            SessionLogModel.end_user_active_sessions(current_user_id)
+
+        # Optional activity log
+        if current_user_id:
+            ActivityLogModel.log_activity(current_user_id, "User logged out")
+
         page.close(drawer)
         page.session.clear()
         show_login(page)
